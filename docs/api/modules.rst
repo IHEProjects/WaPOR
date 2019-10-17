@@ -1,7 +1,7 @@
-temppythonqpan
-==============
+wapor
+=====
 
 .. toctree::
    :maxdepth: 4
 
-   temppythonqpan
+   wapor
