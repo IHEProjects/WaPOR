@@ -2,7 +2,7 @@
 accounts.yml
 
 # tests download
-tests/data/download/
+tests/data/Download/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
