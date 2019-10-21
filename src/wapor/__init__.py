@@ -33,5 +33,6 @@ __doc__ = """module for FAO WAPOR API"""
 __version__ = '0.1'
 
 # initiate class for .his-files
-API = __WaPOR_API_class()
-API.Token=input('Insert WAPOR API Token: ')
+WaPOR_Token = input('Insert WAPOR API Token: ')
+
+API = __WaPOR_API_class(APIToken=WaPOR_Token)
