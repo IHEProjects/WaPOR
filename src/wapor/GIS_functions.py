@@ -37,15 +37,21 @@ def GetGeoInfo(fh, subdataset=0):
         Projection of fh.
     """
     SourceDS = gdal.Open(fh, gdal.GA_ReadOnly)
+
     Type = SourceDS.GetDriver().ShortName
     if Type == 'HDF4' or Type == 'netCDF':
         SourceDS = gdal.Open(SourceDS.GetSubDatasets()[subdataset][0])
+
     NDV = SourceDS.GetRasterBand(1).GetNoDataValue()
+
     xsize = SourceDS.RasterXSize
     ysize = SourceDS.RasterYSize
+
     GeoT = SourceDS.GetGeoTransform()
+
     Projection = osr.SpatialReference()
     Projection.ImportFromWkt(SourceDS.GetProjectionRef())
+
     driver = gdal.GetDriverByName(Type)
     return driver, NDV, xsize, ysize, GeoT, Projection
 
@@ -71,24 +77,18 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False):
     Array : ndarray
         Array with the pixel values.
     """
+
     datatypes = {
-        "uint8": np.uint8,
-        "uint16": np.uint16,
-        "uint32": np.uint32,
-        "int8": np.int8,
-        "int16": np.int16,
-        "Int16": np.int16,
-        "int32": np.int32,
-        "float32": np.float32,
-        "float64": np.float64,
-        "complex64": np.complex64,
-        "complex128": np.complex128,
-        "Int32": np.int32,
-        "Float32": np.float32,
-        "Float64": np.float64,
-        "Complex64": np.complex64,
-        "Complex128": np.complex128, }
+        "uint8": np.uint8, "int8": np.int8,
+        "uint16": np.uint16, "int16": np.int16, "Int16": np.int16,
+        "uint32": np.uint32, "int32": np.int32, "Int32": np.int32,
+        "float32": np.float32, "float64": np.float64,
+        "Float32": np.float32, "Float64": np.float64,
+        "complex64": np.complex64, "complex128": np.complex128,
+        "Complex64": np.complex64, "Complex128": np.complex128, }
+
     DataSet = gdal.Open(fh, gdal.GA_ReadOnly)
+
     Type = DataSet.GetDriver().ShortName
     if Type == 'HDF4':
         Subdataset = gdal.Open(DataSet.GetSubDatasets()[bandnumber][0])
@@ -96,7 +96,9 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False):
     else:
         Subdataset = DataSet.GetRasterBand(bandnumber)
         NDV = Subdataset.GetNoDataValue()
+
     Array = Subdataset.ReadAsArray().astype(datatypes[dtype])
+
     if nan_values:
         Array[Array == NDV] = np.nan
     return Array
@@ -126,24 +128,34 @@ def CreateGeoTiff(fh, Array, driver, NDV, xsize, ysize, GeoT,
     Projection : str
         Projection of fh.
     """
-    datatypes = {"uint8": 1, "int8": 1, "uint16": 2, "int16": 3, "Int16": 3, "uint32": 4,
-                 "int32": 5, "float32": 6, "float64": 7, "complex64": 10, "complex128": 11,
-                 "Int32": 5, "Float32": 6, "Float64": 7, "Complex64": 10, "Complex128": 11, }
+    datatypes = {
+        "uint8": 1, "int8": 1,
+        "uint16": 2, "int16": 3, "Int16": 3,
+        "uint32": 4, "int32": 5, "Int32": 5,
+        "float32": 6, "float64": 7,
+        "Float32": 6, "Float64": 7,
+        "complex64": 10, "complex128": 11,
+        "Complex64": 10, "Complex128": 11, }
+
     if compress is not None:
         DataSet = driver.Create(fh, xsize, ysize, 1, datatypes[Array.dtype.name], [
                                 'COMPRESS={0}'.format(compress)])
     else:
         DataSet = driver.Create(fh, xsize, ysize, 1,
                                 datatypes[Array.dtype.name])
+
     if NDV is None:
         NDV = -9999
+
     if explicit:
         Array[np.isnan(Array)] = NDV
+
     DataSet.GetRasterBand(1).SetNoDataValue(NDV)
     DataSet.SetGeoTransform(GeoT)
     DataSet.SetProjection(Projection.ExportToWkt())
     DataSet.GetRasterBand(1).WriteArray(Array)
     DataSet = None
+
     if "nt" not in Array.dtype.name:
         Array[Array == NDV] = np.nan
 
@@ -174,14 +186,18 @@ def MatchProjResNDV(source_file, target_fhs, output_dir,
     output_files : ndarray
         Filehandles of the created files.
     """
-    dst_info = gdal.Info(gdal.Open(source_file), format='json')
     output_files = np.array([])
+
+    dst_info = gdal.Info(gdal.Open(source_file), format='json')
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+
     for target_file in target_fhs:
         folder, fn = os.path.split(target_file)
-        src_info = gdal.Info(gdal.Open(target_file), format='json')
         output_file = os.path.join(output_dir, fn)
+
+        src_info = gdal.Info(gdal.Open(target_file), format='json')
         gdal.Warp(output_file, target_file, format='GTiff',
                   srcSRS=src_info['coordinateSystem']['wkt'],
                   dstSRS=dst_info['coordinateSystem']['wkt'],
@@ -195,7 +211,9 @@ def MatchProjResNDV(source_file, target_fhs, output_dir,
                                 dst_info['cornerCoordinates']['upperRight'][1]),
                   outputBoundsSRS=dst_info['coordinateSystem']['wkt'],
                   resampleAlg=resample)
+
         output_files = np.append(output_files, output_file)
+
         if not np.any([scale == 1.0, scale is None, scale == 1]):
             driver, NDV, xsize, ysize, GeoT, Projection = GetGeoInfo(
                 output_file)
@@ -209,6 +227,7 @@ def MatchProjResNDV(source_file, target_fhs, output_dir,
                 ysize,
                 GeoT,
                 Projection)
+
         if ndv_to_zero:
             driver, NDV, xsize, ysize, GeoT, Projection = GetGeoInfo(
                 output_file)
