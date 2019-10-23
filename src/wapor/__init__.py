@@ -47,6 +47,12 @@ print_job = False
 if os.path.exists(file):
     WaPOR_Token = yaml.load(open(file, 'r'), Loader=yaml.FullLoader)
 else:
-    WaPOR_Token = input('Insert WAPOR API Token: ')
+    # WaPOR_Token = input('Insert WAPOR API Token: ')
+
+    file_ex = os.path.join(__location__, 'token-example.yml')
+    if os.path.exists(file_ex):
+        WaPOR_Token = yaml.load(open(file_ex, 'r'), Loader=yaml.FullLoader)
+    else:
+        raise FileNotFoundError('ERROR: "{f}" not found.'.format(f=file))
 
 API = WaPOR_API_class(APIToken=WaPOR_Token, print_job=print_job)
