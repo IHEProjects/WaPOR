@@ -29,7 +29,7 @@ finally:
 import os
 import yaml
 import inspect
-from .WaporAPI import __WaPOR_API_class
+from .WaporAPI import WaPOR_API_class
 
 # __all__ = ['AET_dekadal','NPP_dekadal','LCC_yearly']
 __doc__ = """module for FAO WAPOR API"""
@@ -49,4 +49,4 @@ if os.path.exists(file):
 else:
     WaPOR_Token = input('Insert WAPOR API Token: ')
 
-API = __WaPOR_API_class(APIToken=WaPOR_Token, print_job=print_job)
+API = WaPOR_API_class(APIToken=WaPOR_Token, print_job=print_job)

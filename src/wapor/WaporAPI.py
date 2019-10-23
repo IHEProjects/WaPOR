@@ -15,16 +15,17 @@ import pandas as pd
 TIME_SLEEP_SECOND = 2
 
 
-class __WaPOR_API_class(object):
+class WaPOR_API_class(object):
     """WaPOR API Class
 
     API Docs
+
     - `sign_in <https://io.apps.fao.org/gismgr/api/v1/iam/sign-in/>`_
     - `refresh <https://io.apps.fao.org/gismgr/api/v1/iam/token>`_
     - `catalog <https://io.apps.fao.org/gismgr/api/v1/catalog/workspaces/>`_
     - `download <https://io.apps.fao.org/gismgr/api/v1/download/>`_
     - `query <https://io.apps.fao.org/gismgr/api/v1/query/>`_
-    - `jobs <https://io.apps.fao.org/gismgr/api/v1/catalog/workspaces/WAPOR/jobs/`_
+    - `jobs <https://io.apps.fao.org/gismgr/api/v1/catalog/workspaces/WAPOR/jobs/>`_
 
     Parameters
     ----------
@@ -90,13 +91,13 @@ class __WaPOR_API_class(object):
         self.getInitToken(APIToken)
 
     def getInitToken(self, APIToken):
-        '''Initiate AccessToken and RefreshToken
+        """Initiate AccessToken and RefreshToken
 
         Parameters
         ----------
         APIToken: str
             Input WaPOR API token.
-        '''
+        """
         print('WaPOR: Loading sign-in...')
 
         try:
@@ -117,13 +118,13 @@ class __WaPOR_API_class(object):
             }
 
     def _query_accessToken(self, APIToken):
-        '''Query AccessToken and RefreshToken
+        """Query AccessToken and RefreshToken
 
         Parameters
         ----------
         APIToken: str
             Input WaPOR API token.
-        '''
+        """
         print('WaPOR:   _query_accessToken')
 
         base_url = '{0}'
@@ -162,13 +163,8 @@ class __WaPOR_API_class(object):
                 print('Error: Cannot get {url}'.format(url=request_url))
 
     def getCheckToken(self):
-        '''Check AccessToken expires, and refresh token
-
-        Parameters
-        ----------
-        APIToken: str
-            Input WaPOR API token.
-        '''
+        """Check AccessToken expires, and refresh token
+        """
         print('WaPOR: Checking token...')
 
         APIToken = self.token['API']
@@ -197,8 +193,8 @@ class __WaPOR_API_class(object):
                 print('Access Token (new) is:', self.token['Access'])
 
     def _query_refreshToken(self, RefreshToken):
-        '''Query AccessToken expires, and refresh token
-        '''
+        """Query AccessToken expires, and refresh token
+        """
         print('WaPOR:   _query_refreshToken')
 
         base_url = '{0}'
@@ -238,8 +234,8 @@ class __WaPOR_API_class(object):
                 print('Error: Cannot get {url}'.format(url=request_url))
 
     def getWorkspaces(self):
-        '''Get workspace
-        '''
+        """Get workspace
+        """
         print('WaPOR: Loading workspace...')
 
         try:
@@ -251,8 +247,8 @@ class __WaPOR_API_class(object):
         return self.wkspaces
 
     def _query_workspaces(self):
-        '''Query workspace
-        '''
+        """Query workspace
+        """
         print('WaPOR:   _query_workspaces')
 
         base_url = '{0}?overview=false&paged=false&sort=code'
@@ -289,22 +285,22 @@ class __WaPOR_API_class(object):
                 print('Error: Cannot get {url}'.format(url=request_url))
 
     def getCatalog(self, version=None, level=None, cubeInfo=True):
-        '''Get catalog from workspace
+        """Get catalog from workspace
 
         Parameters
         ----------
-        version: int
+        version: int, optional
             WaPOR workspace version, default 2.
-        level: int
+        level: int, optional
             Data resolution level, default None.
-        cubeInfo: bool
+        cubeInfo: bool, optional
             Get cube information, default True.
 
         Returns
         -------
-        catalog : pd.DataFrame
+        catalog: :obj:`pandas.DataFrame`
             Catalog table.
-        '''
+        """
         print('WaPOR: Loading catalog WaPOR_{v}.L{l}...'.format(v=version, l=level))
 
         self.version = 2
@@ -337,8 +333,8 @@ class __WaPOR_API_class(object):
         return self.catalog
 
     def _query_catalog(self, version=None, level=None):
-        '''Query catalog from workspace
-        '''
+        """Query catalog from workspace
+        """
         print('WaPOR:   _query_catalog')
 
         if self.level is None:
@@ -397,7 +393,7 @@ class __WaPOR_API_class(object):
 #        return cube_info
 
     def getCubeInfo(self, cube_code):
-        '''Get cube info
+        """Get cube info
 
         Parameters
         ----------
@@ -406,9 +402,9 @@ class __WaPOR_API_class(object):
         
         Returns
         -------
-        cube_info : dict
+        cube_info: dict
             Cube information.
-        '''
+        """
         print('WaPOR: Loading "{c_code}" info...'.format(c_code=cube_code))
 
         isFound = False
@@ -461,8 +457,8 @@ class __WaPOR_API_class(object):
                 'ERROR: "{c_code}" is not available in WaPOR'.format(c_code=cube_code))
 
     def _query_cubeMeasures(self, cube_code, version=1):
-        '''Query cube measures
-        '''
+        """Query cube measures
+        """
         # print('WaPOR:   _query_cubeMeasures')
 
         base_url = '{0}{1}/cubes/{2}/measures?overview=false&paged=false'
@@ -502,8 +498,8 @@ class __WaPOR_API_class(object):
                 print('Error: Cannot get {url}'.format(url=request_url))
 
     def _query_cubeDimensions(self, cube_code, version = 1):
-        '''Query cube dimensions
-        '''
+        """Query cube dimensions
+        """
         # print('WaPOR:   _query_cubeDimensions')
 
         base_url = '{0}{1}/cubes/{2}/dimensions?overview=false&paged=false'
@@ -543,29 +539,26 @@ class __WaPOR_API_class(object):
 
     def getAvailData(self, cube_code, time_range = '2009-01-01,2018-12-31',
                      location = [], season = [], stage = []):
-        '''Get Available Data
+        """Get Available Data
 
         Parameters
         ----------
         cube_code: str
-            ex. 'L2_CTY_PHE_S'
-        time_range: str
-            ex. '2009-01-01,2018-12-31'
-        location: list of strings
-            default: empty list, return all available locations
-            ex. ['ETH']
-        season: list of strings
-            default: empty list, return all available seasons
-            ex. ['S1']
-        stage: list of strings
-            default: empty list, return all available stages
-            ex. ['EOS','SOS']
+            ex. 'L2_CTY_PHE_S'.
+        time_range: str, optional
+            ex. '2009-01-01,2018-12-31'.
+        location: list, str, optional
+            default: empty list, return all available locations, ex. ['ETH'].
+        season: list, str, optional
+            default: empty list, return all available seasons, ex. ['S1'].
+        stage: list, str, optional
+            default: empty list, return all available stages, ex. ['EOS','SOS'].
 
         Returns
         -------
-        data : pd.DataFrame
+        data: :obj:`pandas.DataFrame`
             Available Data table.
-        '''
+        """
         # Check AccessToken expires
         self.getCheckToken()
         AccessToken = self.token['Access']
@@ -648,8 +641,8 @@ class __WaPOR_API_class(object):
 
     def _query_availData(self, cube_code, measure_code,
                          dims_ls, columns_codes, rows_codes):
-        '''Query Available Data
-        '''
+        """Query Available Data
+        """
         print('WaPOR:   _query_availData')
 
         base_url = '{0}'
@@ -713,8 +706,8 @@ class __WaPOR_API_class(object):
                 print('Error: Cannot get {url}'.format(url=request_url))
 
     def _query_dimensionsMembers(self, cube_code, dims_code):
-        '''Query dimensions members
-        '''
+        """Query dimensions members
+        """
         print('WaPOR:   _query_dimensionsMembers')
 
         base_url = '{0}{1}/cubes/{2}/dimensions/{3}/members?overview=false&paged=false'
@@ -758,20 +751,20 @@ class __WaPOR_API_class(object):
                 print('Error: Cannot get {url}'.format(url=request_url))
 
     def getLocations(self, version=None, level=None):
-        '''Get Locations
+        """Get Locations
 
         Parameters
         ----------
-        version: int
+        version: int, optional
             WaPOR workspace version, default 2.
-        level: int
+        level: int, optional
             Data resolution level, 2 or 3, default None.
 
         Returns
         -------
-        locations : pd.DataFrame
+        locations: :obj:`pandas.DataFrame`
             Locations table.
-        '''
+        """
         print('WaPOR: Loading locations WaPOR_{v}.L{l}...'.format(v=version, l=level))
 
         self.version = 2
@@ -795,8 +788,8 @@ class __WaPOR_API_class(object):
         return df_loc
 
     def _query_locations(self, version=None, level=None):
-        '''Query Locations
-        '''
+        """Query Locations
+        """
         print('WaPOR:   _query_locations')
 
         base_url = '{0}'
@@ -863,20 +856,20 @@ class __WaPOR_API_class(object):
                 print('Error: Cannot get {url}'.format(url=request_url))
 
     def getRasterUrl(self, cube_code, rasterId, APIToken=""):
-        '''Get Raster Url
+        """Get Raster Url
 
         Parameters
         ----------
-        cube_code: string
+        cube_code: str
             Cube code.
-        rasterId: string
+        rasterId: str
             Raster ID, from Available Data table "raster_id", ex. "L1_PCP_0901M".
 
         Returns
         -------
-        download : dict
+        download: dict
             Download url and expiry_datetime.
-        '''
+        """
         # Check AccessToken expires
         self.getCheckToken()
         AccessToken = self.token['Access']
@@ -888,8 +881,8 @@ class __WaPOR_API_class(object):
         return download_url
 
     def _query_rasterUrl(self, cube_code, rasterId, AccessToken):
-        '''Query Raster Url
-        '''
+        """Query Raster Url
+        """
         print('WaPOR:   _query_rasterUrl')
 
         base_url = '{0}{1}'
@@ -944,7 +937,7 @@ class __WaPOR_API_class(object):
 
     def getCropRasterURL(self, bbox, cube_code,
                          time_code, rasterId, APIToken=""):
-        '''Get Crop Raster Url
+        """Get Crop Raster Url
 
         Do need Authorization
 
@@ -952,20 +945,20 @@ class __WaPOR_API_class(object):
         ----------
         bbox: list
             [xmin,ymin,xmax,ymax], latitude and longitude.
-        cube_code: string
+        cube_code: str
             Cube code.
-        time_code: string
+        time_code: str
             Time code, from Available Data table "raster_id", ex. "[2009-01-01,2009-02-01)".
-        rasterId: string
+        rasterId: str
             Raster ID, from Available Data table "raster_id", ex. "L1_PCP_0901M".
-        APIToken: string
+        APIToken: str
             WaPOR API Token.
 
         Returns
         -------
-        download : string
+        download: str
             Download url.
-        '''
+        """
         # Check AccessToken expires
         self.getCheckToken()
         AccessToken = self.token['Access']
@@ -1092,26 +1085,26 @@ class __WaPOR_API_class(object):
 
     def getAreaTimeseries(self, shapefile_fh, cube_code,
                           time_range="2009-01-01,2018-12-31", APIToken=""):
-        '''Get Area Timeseries
+        """Get Area Timeseries
 
         Do need Authorization
 
         Parameters
         ----------
         shapefile_fh: str
-            ex. "E:/Area.shp"
-        cube_code: string
+            ex. "E:/Area.shp".
+        cube_code: str
             Cube code.
-        time_range: str
+        time_range: str, optional
             "YYYY-MM-DD,YYYY-MM-DD".
-        APIToken: string
+        APIToken: str
             WaPOR API Token.
 
         Returns
         -------
-        timeseries : pd.DataFrame
+        timeseries: :obj:`pandas.DataFrame`
             Area timeseries table.
-        '''
+        """
         # Check AccessToken expires
         self.getCheckToken()
         AccessToken = self.token['Access']
@@ -1217,8 +1210,8 @@ class __WaPOR_API_class(object):
                 print('Error: Cannot get {url}'.format(url=request_url))
 
     def _query_jobOutput(self, job_url):
-        '''Query Job output, url(str) or table(pd.DataFrame)
-        '''
+        """Query Job output, url(str) or table(pd.DataFrame)
+        """
         print('WaPOR:   _query_jobOutput')
 
         request_url = job_url
@@ -1281,24 +1274,24 @@ class __WaPOR_API_class(object):
 
     def getPixelTimeseries(self, pixelCoordinates, cube_code,
                            time_range="2009-01-01,2018-12-31"):
-        '''Get Pixel Timeseries
+        """Get Pixel Timeseries
 
         Do not need Authorization
 
         Parameters
         ----------
         pixelCoordinates: list
-            [37.95883206252312, 7.89534]
-        cube_code: string
+            ex. [37.95883206252312, 7.89534].
+        cube_code: str
             Cube code.
-        time_range: str
+        time_range: str, optional
             "YYYY-MM-DD,YYYY-MM-DD".
 
         Returns
         -------
-        timeseries : pd.DataFrame
+        timeseries: :obj:`pandas.DataFrame`
             Point timeseries table.
-        '''
+        """
         # get cube info
         # cube_info = self.getCubeInfo(cube_code)
         catalog = self.getCatalog(self.version, self.level, cubeInfo=True)

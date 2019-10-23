@@ -74,7 +74,7 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False):
 
     Returns
     -------
-    Array : ndarray
+    Array: :obj:`numpy.ndarray`
         Array with the pixel values.
     """
 
@@ -183,7 +183,7 @@ def MatchProjResNDV(source_file, target_fhs, output_dir,
 
     Returns
     -------
-    output_files : ndarray
+    output_files: :obj:`numpy.ndarray`
         Filehandles of the created files.
     """
     output_files = np.array([])
