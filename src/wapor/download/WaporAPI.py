@@ -98,13 +98,13 @@ class WaPOR_API_class(object):
         APIToken: str
             Input WaPOR API token.
         """
-        print('WaPOR: API, Loading sign-in...')
+        print('WaPOR API: Loading sign-in...')
 
         try:
             Token = self._query_accessToken(APIToken)
         except BaseException:
             print(
-                'ERROR: The data with specified level version is not available in this version')
+                'WaPOR ERROR: The data with specified level version is not available in this version')
         else:
             self.token = {
                 'API': APIToken,
@@ -125,7 +125,7 @@ class WaPOR_API_class(object):
         APIToken: str
             Input WaPOR API token.
         """
-        print('WaPOR:   _query_accessToken')
+        print('WaPOR API:   _query_accessToken')
 
         base_url = '{0}'
         request_url = base_url.format(
@@ -165,7 +165,7 @@ class WaPOR_API_class(object):
     def getCheckToken(self):
         """Check AccessToken expires, and refresh token
         """
-        print('WaPOR: API, Checking token...')
+        print('WaPOR API: Checking token...')
 
         APIToken = self.token['API']
         RefToken = self.token['Refresh']
@@ -177,7 +177,7 @@ class WaPOR_API_class(object):
             try:
                 Token = self._query_refreshToken(RefToken)
             except BaseException:
-                raise('ERROR: The data with specified level version is not available in this version')
+                raise('WaPOR ERROR: The data with specified level version is not available in this version')
             else:
                 self.token = {
                     'API': APIToken,
@@ -195,7 +195,7 @@ class WaPOR_API_class(object):
     def _query_refreshToken(self, RefreshToken):
         """Query AccessToken expires, and refresh token
         """
-        print('WaPOR:   _query_refreshToken')
+        print('WaPOR API:   _query_refreshToken')
 
         base_url = '{0}'
         request_url = base_url.format(
@@ -236,20 +236,20 @@ class WaPOR_API_class(object):
     def getWorkspaces(self):
         """Get workspace
         """
-        print('WaPOR: API, Loading workspace...')
+        print('WaPOR API: Loading workspace...')
 
         try:
             df = self._query_workspaces()
         except BaseException:
             print(
-                'ERROR: The data with specified level version is not available in this version')
+                'WaPOR ERROR: The data with specified level version is not available in this version')
         self.wkspaces = df
         return self.wkspaces
 
     def _query_workspaces(self):
         """Query workspace
         """
-        print('WaPOR:   _query_workspaces')
+        print('WaPOR API:   _query_workspaces')
 
         base_url = '{0}?overview=false&paged=false&sort=code'
         request_url = base_url.format(
@@ -301,7 +301,7 @@ class WaPOR_API_class(object):
         catalog: :obj:`pandas.DataFrame`
             Catalog table.
         """
-        print('WaPOR: API, Loading catalog WaPOR_{v}.L{l}...'.format(v=version, l=level))
+        print('WaPOR API: Loading catalog WaPOR_{v}.L{l}...'.format(v=version, l=level))
 
         isFound = False
 
@@ -318,12 +318,12 @@ class WaPOR_API_class(object):
         if isFound:
             df = self.catalog
 
-            print('WaPOR: API, Loading catalog WaPOR_{v}.L{l} found.'.format(
+            print('WaPOR API: Loading catalog WaPOR_{v}.L{l} found.'.format(
                 v=version, l=level))
         else:
             df = self._query_catalog(version, level)
 
-            print('WaPOR: API, Loading catalog WaPOR_{v}.L{l} loaded.'.format(
+            print('WaPOR API: Loading catalog WaPOR_{v}.L{l} loaded.'.format(
                 v=version, l=level))
 
         if cubeInfo:
@@ -341,26 +341,26 @@ class WaPOR_API_class(object):
     def _query_catalog(self, version=None, level=None):
         """Query catalog from workspace
         """
-        print('WaPOR:   _query_catalog')
+        print('WaPOR API:   _query_catalog')
 
         if isinstance(version, int):
             if 0 < version < 3:
                 self.version = version
             else:
                 raise ValueError(
-                    'ERROR: _query_catalog: Version "{v}" is not correct!'.format(v=version))
+                    'WaPOR ERROR: _query_catalog: Version "{v}" is not correct!'.format(v=version))
 
         if isinstance(level, int):
             if 0 < level < 4:
                 self.level = level
             else:
                 raise ValueError(
-                    'ERROR: _query_catalog: level "{l}" is not correct!'.format(l=level))
+                    'WaPOR ERROR: _query_catalog: level "{l}" is not correct!'.format(l=level))
         elif level is None:
                 self.version = version
         else:
             raise ValueError(
-                'ERROR: _query_catalog: level "{l}" is not correct!'.format(l=level))
+                'WaPOR ERROR: _query_catalog: level "{l}" is not correct!'.format(l=level))
 
         if self.level is None:
             base_url = '{0}{1}/cubes?overview=false&paged=false'
@@ -434,7 +434,7 @@ class WaPOR_API_class(object):
         cube_info: dict
             Cube information.
         """
-        print('WaPOR: API, Loading "{c_code}" CubeInfo...'.format(
+        print('WaPOR API: Loading "{c_code}" CubeInfo...'.format(
             c_code=cube_code))
 
         isFound = False
@@ -480,7 +480,7 @@ class WaPOR_API_class(object):
                 isFound = True
 
         if isFound:
-            print('WaPOR: API, "{c_code}" is found in WaPOR_{v}.L{l}'.format(
+            print('WaPOR API: "{c_code}" is found in WaPOR_{v}.L{l}'.format(
                 c_code=cube_code, v=version, l=level))
 
             catalog = self.getCatalog(version, level, cubeInfo=True)
@@ -488,12 +488,12 @@ class WaPOR_API_class(object):
             return cube_info
         else:
             raise ValueError(
-                'ERROR: "{c_code}" is not available in WaPOR'.format(c_code=cube_code))
+                'WaPOR ERROR: "{c_code}" is not available in WaPOR'.format(c_code=cube_code))
 
     def _query_cubeMeasures(self, cube_code):
         """Query cube measures
         """
-        # print('WaPOR:   _query_cubeMeasures')
+        # print('WaPOR API:   _query_cubeMeasures')
 
         base_url = '{0}{1}/cubes/{2}/measures?overview=false&paged=false'
         request_url = base_url.format(
@@ -534,7 +534,7 @@ class WaPOR_API_class(object):
     def _query_cubeDimensions(self, cube_code):
         """Query cube dimensions
         """
-        # print('WaPOR:   _query_cubeDimensions')
+        # print('WaPOR API:   _query_cubeDimensions')
 
         base_url = '{0}{1}/cubes/{2}/dimensions?overview=false&paged=false'
         request_url=base_url.format(
@@ -610,9 +610,9 @@ class WaPOR_API_class(object):
             # get dimension
             cube_dimensions = cube_info['dimension']
         except BaseException:
-            print('ERROR: Cannot get cube info')
+            print('WaPOR ERROR: Cannot get cube info')
 
-        print('WaPOR: API, Loading "{c_code}" data...'.format(c_code=cube_code))
+        print('WaPOR API: Loading "{c_code}" data...'.format(c_code=cube_code))
 
         dims_ls=[]
         columns_codes=['MEASURES']
@@ -654,7 +654,7 @@ class WaPOR_API_class(object):
             df = self._query_availData(cube_code, cube_measure_code,
                                        dims_ls, columns_codes, rows_codes)
         except BaseException:
-            print('ERROR:Cannot get list of available data')
+            print('WaPOR ERROR:Cannot get list of available data')
             return None
         
         # sorted df
@@ -682,7 +682,7 @@ class WaPOR_API_class(object):
                          dims_ls, columns_codes, rows_codes):
         """Query Available Data
         """
-        print('WaPOR:   _query_availData')
+        print('WaPOR API:   _query_availData')
 
         base_url = '{0}'
         request_url = base_url.format(
@@ -738,7 +738,7 @@ class WaPOR_API_class(object):
                         # df = pd.DataFrame.from_dict(resp, orient='columns')
                         return df
                     except BaseException:
-                        print('ERROR: Cannot get list of available data')
+                        print('WaPOR ERROR: Cannot get list of available data')
                 else:
                     print(resq_json['message'])
             except BaseException:
@@ -747,7 +747,7 @@ class WaPOR_API_class(object):
     def _query_dimensionsMembers(self, cube_code, dims_code):
         """Query dimensions members
         """
-        print('WaPOR:   _query_dimensionsMembers')
+        print('WaPOR API:   _query_dimensionsMembers')
 
         base_url = '{0}{1}/cubes/{2}/dimensions/{3}/members?overview=false&paged=false'
         request_url = base_url.format(
@@ -783,7 +783,7 @@ class WaPOR_API_class(object):
                         df = pd.DataFrame.from_dict(resp, orient='columns')
                         return df
                     except BaseException:
-                        print('ERROR: Cannot get dimensions Members')
+                        print('WaPOR ERROR: Cannot get dimensions Members')
                 else:
                     print(resq_json['message'])
             except BaseException:
@@ -804,7 +804,7 @@ class WaPOR_API_class(object):
         locations: :obj:`pandas.DataFrame`
             Locations table.
         """
-        print('WaPOR: API, Loading locations WaPOR_{v}.L{l}...'.format(v=version, l=level))
+        print('WaPOR API: Loading locations WaPOR_{v}.L{l}...'.format(v=version, l=level))
 
         self.version = 2
         self.level = None
@@ -829,7 +829,7 @@ class WaPOR_API_class(object):
     def _query_locations(self, version=None, level=None):
         """Query Locations
         """
-        print('WaPOR:   _query_locations')
+        print('WaPOR API:   _query_locations')
 
         base_url = '{0}'
         request_url = base_url.format(
@@ -913,7 +913,7 @@ class WaPOR_API_class(object):
         self.getCheckToken()
         AccessToken = self.token['Access']
 
-        print('WaPOR: API, Loading "{c_code}" url from WaPOR{v}.L{l}...'.format(
+        print('WaPOR API: Loading "{c_code}" url from WaPOR{v}.L{l}...'.format(
             c_code=cube_code, v=self.version, l=self.level))
 
         download_url = self._query_rasterUrl(cube_code, rasterId, AccessToken)
@@ -922,7 +922,7 @@ class WaPOR_API_class(object):
     def _query_rasterUrl(self, cube_code, rasterId, AccessToken):
         """Query Raster Url
         """
-        print('WaPOR:   _query_rasterUrl')
+        print('WaPOR API:   _query_rasterUrl')
 
         base_url = '{0}{1}'
         request_url = base_url.format(
@@ -1018,9 +1018,9 @@ class WaPOR_API_class(object):
                 if cube_dimension['type'] == 'TIME':
                     cube_dimension_code = cube_dimension['code']
         except BaseException:
-            print('ERROR: Cannot get cube info')
+            print('WaPOR ERROR: Cannot get cube info')
 
-        print('WaPOR: API, Loading "{c_code}" url from WaPOR{v}.L{l}...'.format(
+        print('WaPOR API: Loading "{c_code}" url from WaPOR{v}.L{l}...'.format(
             c_code=cube_code, v=self.version, l=self.level))
 
         # Create Polygon
@@ -1109,7 +1109,7 @@ class WaPOR_API_class(object):
                         job_url = resp['links'][0]['href']
 
                         if self.print_job:
-                            print('WaPOR: API, Downloading "{c_code}" "{t}"...'.format(
+                            print('WaPOR API: Downloading "{c_code}" "{t}"...'.format(
                                 c_code=cube_code, t=resp['type']))
 
                         output = self._query_jobOutput(job_url)
@@ -1164,9 +1164,9 @@ class WaPOR_API_class(object):
                 if cube_dimension['type'] == 'TIME':
                     cube_dimension_code = cube_dimension['code']
         except BaseException:
-            print('ERROR: Cannot get cube info')
+            print('WaPOR ERROR: Cannot get cube info')
 
-        print('WaPOR: API, Loading "{c_code}" area timeseries...'.format(c_code=cube_code))
+        print('WaPOR API: Loading "{c_code}" area timeseries...'.format(c_code=cube_code))
 
         # get shapefile info
         import ogr
@@ -1235,7 +1235,7 @@ class WaPOR_API_class(object):
                         job_url = resp['links'][0]['href']
 
                         if self.print_job:
-                            print('WaPOR: API, Downloading "{c_code}" "{t}"...'.format(
+                            print('WaPOR API: Downloading "{c_code}" "{t}"...'.format(
                                 c_code=cube_code, t=resp['type']))
 
                         output = self._query_jobOutput(job_url)
@@ -1251,7 +1251,7 @@ class WaPOR_API_class(object):
     def _query_jobOutput(self, job_url):
         """Query Job output, url(str) or table(pd.DataFrame)
         """
-        print('WaPOR:   _query_jobOutput')
+        print('WaPOR API:   _query_jobOutput')
 
         request_url = job_url
 
@@ -1296,7 +1296,7 @@ class WaPOR_API_class(object):
                                 output = pd.DataFrame(
                                     results['items'], columns=results['header'])
                             else:
-                                print('ERROR: Invalid jobType')
+                                print('WaPOR ERROR: Invalid jobType')
                             return output
                         if resp['status'] == 'COMPLETED WITH ERRORS':
                             contiue = False
@@ -1343,7 +1343,7 @@ class WaPOR_API_class(object):
             if dims['type'] == 'TIME':
                 cube_dimension_code = dims['code']
 
-        print('WaPOR: API, Loading "{c_code}" point timeseries...'.format(c_code=cube_code))
+        print('WaPOR API: Loading "{c_code}" point timeseries...'.format(c_code=cube_code))
 
         # query load
         base_url = '{0}'

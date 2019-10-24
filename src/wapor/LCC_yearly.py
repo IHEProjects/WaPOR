@@ -6,6 +6,7 @@ Created on Tue Jul 23 11:25:33 2019
 """
 import os
 from datetime import datetime
+import psutil
 import requests
 
 import numpy as np
@@ -18,10 +19,10 @@ except ImportError:
 
 
 def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
-         latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05], level=1,
-         version=2, Waitbar=1):
+         latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],
+         version=2, level=1, Waitbar=1):
     """
-    This function downloads yearly WAPOR AETI data
+    This function downloads yearly WAPOR Land Cover Class data
 
     Keyword arguments:
     Dir -- 'C:/file/to/path/'
@@ -30,8 +31,9 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     latlim -- [ymin, ymax] (values must be between -40.05 and 40.05)
     lonlim -- [xmin, xmax] (values must be between -30.05 and 65.05)
     """
-    print('\nDownload yearly WaPOR Land Cover Class data for the period %s till %s' % (
+    print('WaPOR LCC: Download yearly WaPOR Land Cover Class data for the period %s till %s' % (
         Startdate, Enddate))
+    checkMemory('Start')
 
     # Download data
     # WaPOR.API.version = version
@@ -44,16 +46,17 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     elif level == 2:
         cube_code = 'L2_LCC_A'
     else:
-        print('This module only support level 1 and level 2 data. For higher level, use WaPORAPI module')
+        print('WaPOR LCC: This module only support level 1 and level 2 data. For higher level, use WaPORAPI module')
 
     try:
         cube_info = WaPOR.API.getCubeInfo(
             cube_code, version=version, level=level)
         multiplier = cube_info['measure']['multiplier']
     except:
-        print('ERROR: Cannot get cube info. Check if WaPOR version has cube %s' % (
+        raise('WaPOR ERROR: Cannot get cube info. Check if WaPOR version has cube %s' % (
             cube_code))
-        return None
+    finally:
+        cube_info = None
 
     time_range = '{0},{1}'.format(Startdate, Enddate)
 
@@ -61,7 +64,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         df_avail = WaPOR.API.getAvailData(
             cube_code, time_range=time_range, version=version, level=level)
     except:
-        print('ERROR: cannot get list of available data')
+        print('WaPOR ERROR: cannot get list of available data')
         return None
 
     # if Waitbar == 1:
@@ -76,33 +79,62 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         os.makedirs(Dir)
 
     for index, row in df_avail.iterrows():
-        download_url = WaPOR.API.getCropRasterURL(bbox,
-                                                  cube_code,
-                                                  row['time_code'],
-                                                  row['raster_id'],
-                                                  WaPOR.API.token['Access'])
-
+        print('WaPOR LCC: ----- {} -----'.format(index))
+        checkMemory('{} AvailData loop start'.format(index))
         Date = datetime.strptime(row['YEAR'], '%Y')
 
+        # Download raster file name
+        download_file = os.path.join(Dir, '{0}.tif'.format(row['raster_id']))
+        print('WaPOR LCC: Downloaded file :', download_file)
+
+        # Local raster file name
         filename = 'LCC_WAPOR.v2.0_level%s_annually_%s.tif' % (
             level, Date.strftime('%Y'))
         outfilename = os.path.join(Dir, filename)
+        print('WaPOR LCC: Local      file :', outfilename)
 
-        download_file = os.path.join(Dir, '{0}.tif'.format(row['raster_id']))
+        # Downloading raster file
+        checkMemory('{} Downloading start'.format(index))
+        resp = requests.get(WaPOR.API.getCropRasterURL(bbox,
+                                                       cube_code,
+                                                       row['time_code'],
+                                                       row['raster_id'],
+                                                       WaPOR.API.token['Access']))
+        with open(download_file, 'wb') as fp:
+            fp.write(resp.content)
+        checkMemory('{} Downloading end'.format(index))
 
-        # Download raster file
-        resp = requests.get(download_url)
-        open(download_file, 'wb').write(resp.content)
-
+        # GDAL download_file * multiplier => outfilename
         driver, NDV, xsize, ysize, GeoT, Projection = gis.GetGeoInfo(
             download_file)
 
-        # Array = gis.OpenAsArray(download_file, nan_values=True)
-        Array = gis.OpenAsArray(download_file, nan_values=False)
-        CorrectedArray = Array * multiplier
+        Array = gis.OpenAsArray(download_file, nan_values=True)
+        print('WaPOR LCC: Array         : {t}'.format(
+            t=Array.dtype.name))
 
-        gis.CreateGeoTiff(outfilename, CorrectedArray,
+        checkMemory('{} Multiply start'.format(index))
+        NDV = np.float32(NDV)
+        multiplier = np.float32(multiplier)
+        print('WaPOR LCC: NDV           : {v} {t}'.format(
+            v=NDV, t=NDV.dtype.name))
+        print('WaPOR LCC: multiplier    : {v} {t}'.format(
+            v=multiplier, t=multiplier.dtype.name))
+
+        NDV = NDV * multiplier
+        Array = Array * multiplier
+        print('WaPOR LCC: NDV           : {v} {t}'.format(
+            v=NDV, t=NDV.dtype.name))
+        print('WaPOR LCC: Array         : {t}'.format(
+            t=Array.dtype.name))
+        checkMemory('{} Multiply end'.format(index))
+
+        gis.CreateGeoTiff(outfilename, Array,
                           driver, NDV, xsize, ysize, GeoT, Projection)
+
+        Array = None
+        checkMemory('{} AvailData loop end'.format(index))
+
+        # Remove downloaded raster file
         os.remove(download_file)
 
         # if Waitbar == 1:
@@ -111,6 +143,13 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         #                                 prefix='Progress:',
         #                                 suffix='Complete',
         #                                 length=50)
+    checkMemory('End')
+
+
+def checkMemory(txt=''):
+    mem = psutil.virtual_memory()
+    print('WaPOR LCC:   Memory available      : {t} {v:.2f} MB'.format(
+        t=txt, v=mem.available / 1024 / 1024))
 
 
 if __name__ == "__main__":

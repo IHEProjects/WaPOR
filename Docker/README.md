@@ -1,4 +1,4 @@
-# WaterAccounting
+# WaPOR
 
 # BIOS Virtualization
 
@@ -22,7 +22,7 @@ VirtualBox -> Settings -> Shared Folders
 
 Add
 
-* Folder Path: D:\WaterAccounting
+* Folder Path: D:\WaPOR
 * Folder Name: d/wateraccounting
 * Auto-mount
 * Make Permanent
@@ -30,7 +30,7 @@ Add
 Docker CMD
 
 * docker-machine ssh
-* ls /d/wateraccounting
+* ls /d/WaPOR
 
 ### Windows 10, Hyper-V
 
@@ -50,36 +50,36 @@ docker-machine stop default
 cmd window 1
 
 ```
-cd D:\WaterAccounting\Docker
-docker build -t wateraccounting/jupyter .
+cd D:\WaPOR\Docker
+docker build -t quanpan302/ihe_projects_wapor .
 ```
 
 ### Windows 7, VirtualBox
 
 ```
-cd D:\WaterAccounting
-docker run -it --name wa -p 8888:8888 -v /d/WaterAccounting:/notebooks wateraccounting/jupyter
+cd D:\WaPOR
+docker run -it --name WP-Dev -p 8888:8888 -v /d/WaPOR:/notebooks quanpan302/ihe_projects_wapor
 ```
 
 ```
 cd D:\test
-docker run -it --name test -p 8888:8888 -v /d/test:/notebooks wateraccounting/jupyter
+docker run -it --name WP-Test -p 8888:8888 -v /d/test:/notebooks quanpan302/ihe_projects_wapor
 ```
 
 ### Windows 10, Hyper-V
 
 ```
-cd D:\WaterAccounting
-docker run -it --name wa -p 8888:8888 -v D:/WaterAccounting:/notebooks wateraccounting/jupyter
+cd D:\WaPOR
+docker run -it --name WP-Dev -p 8888:8888 -v D:/WaPOR:/notebooks quanpan302/ihe_projects_wapor
 ```
 
 ### Mac, Linux
 
 ```
-cd /Volumes/QPan_T5/WaterAccounting/
-docker run -it --name wa -p 8888:8888 -v $(PWD):/notebooks wateraccounting/jupyter
+cd /Volumes/QPan_T5/WaPOR/
+docker run -it --name WP-Dev -p 8888:8888 -v $(PWD):/notebooks quanpan302/ihe_projects_wapor
 
-# docker run -d --name wa -p 8888:8888 -v $(PWD):/notebooks wateraccounting/jupyter
+# docker run -d --name WP-Dev -p 8888:8888 -v $(PWD):/notebooks quanpan302/ihe_projects_wapor
 ```
 
 ## Access to runing docker
@@ -87,7 +87,7 @@ docker run -it --name wa -p 8888:8888 -v $(PWD):/notebooks wateraccounting/jupyt
 cmd window 2
 
 ```
-docker exec -it wa bash
+docker exec -it WP-Dev bash
 
 jupyter notebook list
 
@@ -102,7 +102,7 @@ python3 wa_gdalwarp.py
 ## Copy data to docker
 
 ```
-docker cp /Volumes/QPan_T5/WaterAccounting gdal:/
+docker cp /Volumes/QPan_T5/WaPOR gdal:/
 ```
 
 ## Clean docker
@@ -114,7 +114,7 @@ docker system prune -f && docker volume prune -f && docker container prune -f
 ## Save docker images
 
 ```
-docker save --output wateraccounting_jupyter.tar wateraccounting/jupyter
+docker save --output wateraccounting_jupyter.tar quanpan302/ihe_projects_wapor
 ```
 
 ## Load docker images
