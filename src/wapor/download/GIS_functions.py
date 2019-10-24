@@ -315,5 +315,5 @@ def MatchProjResNDV(source_file, target_fhs, output_dir,
 
 def checkMemory(txt=''):
     mem = psutil.virtual_memory()
-    print('WaPOR GIS:   Memory available      : {t} {v:.2f} MB'.format(
+    print('WaPOR GIS: > Memory available      > {t} {v:.2f} MB'.format(
         t=txt, v=mem.available / 1024 / 1024))

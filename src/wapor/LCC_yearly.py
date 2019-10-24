@@ -46,7 +46,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     elif level == 2:
         cube_code = 'L2_LCC_A'
     else:
-        print('WaPOR LCC: This module only support level 1 and level 2 data. For higher level, use WaPORAPI module')
+        raise('WaPOR ERROR: This module only support level 1 and level 2 data. For higher level, use WaPORAPI module')
 
     try:
         cube_info = WaPOR.API.getCubeInfo(
@@ -81,15 +81,15 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     for index, row in df_avail.iterrows():
         print('WaPOR LCC: ----- {} -----'.format(index))
         checkMemory('{} AvailData loop start'.format(index))
-        Date = datetime.strptime(row['YEAR'], '%Y')
 
         # Download raster file name
         download_file = os.path.join(Dir, '{0}.tif'.format(row['raster_id']))
         print('WaPOR LCC: Downloaded file :', download_file)
 
         # Local raster file name
+        # Date = datetime.strptime(row['YEAR'], '%Y')
         filename = 'LCC_WAPOR.v2.0_level%s_annually_%s.tif' % (
-            level, Date.strftime('%Y'))
+            level, datetime.strptime(row['YEAR'], '%Y').strftime('%Y'))
         outfilename = os.path.join(Dir, filename)
         print('WaPOR LCC: Local      file :', outfilename)
 
@@ -102,6 +102,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
                                                        WaPOR.API.token['Access']))
         with open(download_file, 'wb') as fp:
             fp.write(resp.content)
+        resp = None
         checkMemory('{} Downloading end'.format(index))
 
         # GDAL download_file * multiplier => outfilename
@@ -148,7 +149,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
 
 def checkMemory(txt=''):
     mem = psutil.virtual_memory()
-    print('WaPOR LCC:   Memory available      : {t} {v:.2f} MB'.format(
+    print('WaPOR LCC: > Memory available      > {t} {v:.2f} MB'.format(
         t=txt, v=mem.available / 1024 / 1024))
 
 
