@@ -145,7 +145,11 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         checkMemory('{} AvailData loop end'.format(index))
 
         # Remove downloaded raster file
-        os.remove(download_file)
+        try:
+            os.remove(download_file)
+        except OSError as err:
+            # if failed, report it back to the user
+            print("Error: %s - %s." % (err.filename, err.strerror))
 
         # if Waitbar == 1:
         #     amount += 1
@@ -167,5 +171,6 @@ if __name__ == "__main__":
         '../', '../', 'tests', 'data'
     )
     main(Dir=dir_path, Startdate='2009-01-01', Enddate='2018-12-31',
-         latlim=[-10.0, 10.0], lonlim=[-10.0, 15.0],
+         #  latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],
+         latlim=[-40.05, 40.05], lonlim=[-30.5, 0.0],
          version=2, level=1)
