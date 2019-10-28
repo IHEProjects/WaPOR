@@ -3,6 +3,9 @@ token.yml
 
 # tests download
 tests/data/Download/
+tests/data/L1_LCC_A/
+tests/data/L1_NPP_D/
+tests/data/L1_AETI_D/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

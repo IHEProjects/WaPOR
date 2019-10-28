@@ -166,4 +166,6 @@ if __name__ == "__main__":
         os.path.dirname(os.path.realpath(__file__)),
         '../', '../', 'tests', 'data'
     )
-    main(Dir=dir_path)
+    main(Dir=dir_path, Startdate='2009-01-01', Enddate='2018-12-31',
+         latlim=[-10.0, 10.0], lonlim=[-10.0, 15.0],
+         version=2, level=1)
