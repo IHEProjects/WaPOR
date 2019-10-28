@@ -12,6 +12,8 @@ import datetime
 import json
 import pandas as pd
 
+TIME_EXPIRES_BEFORE_SECOND = 120  # From API expires time is 3600sec
+# TIME_EXPIRES_BEFORE_SECOND = 600  # From API expires time is 3600sec
 TIME_SLEEP_SECOND = 2
 
 
@@ -39,7 +41,7 @@ class WaPOR_API_class(object):
         """
         """
         if APIToken == '':
-            raise ValueError('APIToken must be provided!')
+            raise ValueError('WaPOR API ERROR: APIToken must be provided!')
 
         self.print_job = print_job
 
@@ -100,11 +102,10 @@ class WaPOR_API_class(object):
         """
         print('WaPOR API: Loading sign-in...')
 
-        try:
-            Token = self._query_accessToken(APIToken)
-        except BaseException:
-            print(
-                'WaPOR ERROR: The data with specified level version is not available in this version')
+        Token = self._query_accessToken(APIToken)
+        if Token is None:
+            raise Exception(
+                'WaPOR API ERROR: The data with specified level version is not available in this version')
         else:
             self.token = {
                 'API': APIToken,
@@ -134,63 +135,60 @@ class WaPOR_API_class(object):
         if self.print_job:
             print(request_url)
 
+        request_headers = {
+            'X-GISMGR-API-KEY': APIToken}
+
         # requests
         try:
             resq = requests.post(
                 request_url,
-                headers={
-                    'X-GISMGR-API-KEY': APIToken})
+                headers=request_headers)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
                 resp = resq_json['response']
+                # print(resp)
 
                 if resq_json['message'] == 'OK':
                     return resp
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(
+                    url=request_url))
 
     def getCheckToken(self):
         """Check AccessToken expires, and refresh token
         """
         print('WaPOR API: Checking token...')
 
-        APIToken = self.token['API']
+        # APIToken = self.token['API']
         RefToken = self.token['Refresh']
         dt_start = self.token['time']['start']
         dt_expire = self.token['time']['expire']
 
         dt_now = datetime.datetime.now().timestamp()
-        if dt_now - dt_start > dt_expire:
-            try:
-                Token = self._query_refreshToken(RefToken)
-            except BaseException:
-                raise('WaPOR ERROR: The data with specified level version is not available in this version')
+        if dt_now - dt_start > dt_expire - TIME_EXPIRES_BEFORE_SECOND:
+            Token = self._query_refreshToken(RefToken)
+
+            if Token is None:
+                raise Exception(
+                    'WaPOR API ERROR: The data with specified level version is not available in this version')
             else:
-                self.token = {
-                    'API': APIToken,
-                    'Access': Token['accessToken'],
-                    'Refresh': Token['refreshToken'],
-                    'time': {
-                        'expire': Token['expiresIn'],
-                        'start': dt_now,
-                        'now': dt_now
-                    },
-                }
-            finally:
-                print('Access Token (new) is:', self.token['Access'])
+                self.token['Access'] = Token['accessToken']
+                self.token['Refresh'] = Token['refreshToken']
+                self.token['time']['expire'] = Token['expiresIn']
+                self.token['time']['start'] = dt_now
+                self.token['time']['now'] = dt_now
 
     def _query_refreshToken(self, RefreshToken):
         """Query AccessToken expires, and refresh token
@@ -204,47 +202,50 @@ class WaPOR_API_class(object):
         if self.print_job:
             print(request_url)
 
+        request_json = {
+                    'grandType': 'refresh_token',
+                    'refreshToken': RefreshToken}
+
         # requests
         try:
             resq = requests.post(
                 request_url,
-                params={
-                    'grandType': 'refresh_token',
-                    'refreshToken': RefreshToken})
+                json=request_json)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
                 resp = resq_json['response']
+                # print(resp)
 
                 if resq_json['message'] == 'OK':
                     return resp
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(
+                    url=request_url))
 
     def getWorkspaces(self):
         """Get workspace
         """
         print('WaPOR API: Loading workspace...')
 
-        try:
-            df = self._query_workspaces()
-        except BaseException:
-            print(
-                'WaPOR ERROR: The data with specified level version is not available in this version')
-        self.wkspaces = df
-        return self.wkspaces
+        df = self._query_workspaces()
+        if df is None:
+            raise Exception(
+                'WaPOR API ERROR: The data with specified level version is not available in this version')
+        else:
+            self.wkspaces = df
+            return self.wkspaces
 
     def _query_workspaces(self):
         """Query workspace
@@ -264,25 +265,26 @@ class WaPOR_API_class(object):
                 request_url)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
                 resp = resq_json['response']
+                # print(resp)
 
                 if resq_json['message'] == 'OK':
                     return resp
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(
+                    url=request_url))
 
     def getCatalog(self, version=None, level=None, cubeInfo=True):
         """Get catalog from workspace
@@ -348,19 +350,19 @@ class WaPOR_API_class(object):
                 self.version = version
             else:
                 raise ValueError(
-                    'WaPOR ERROR: _query_catalog: Version "{v}" is not correct!'.format(v=version))
+                    'WaPOR API ERROR: _query_catalog: Version "{v}" is not correct!'.format(v=version))
 
         if isinstance(level, int):
             if 0 < level < 4:
                 self.level = level
             else:
                 raise ValueError(
-                    'WaPOR ERROR: _query_catalog: level "{l}" is not correct!'.format(l=level))
+                    'WaPOR API ERROR: _query_catalog: level "{l}" is not correct!'.format(l=level))
         elif level is None:
                 self.version = version
         else:
             raise ValueError(
-                'WaPOR ERROR: _query_catalog: level "{l}" is not correct!'.format(l=level))
+                'WaPOR API ERROR: _query_catalog: level "{l}" is not correct!'.format(l=level))
 
         if self.level is None:
             base_url = '{0}{1}/cubes?overview=false&paged=false'
@@ -383,19 +385,19 @@ class WaPOR_API_class(object):
                 request_url)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
 
             try:
                 resp = resq_json['response']
+                # print(resp)
 
                 if resq_json['message'] == 'OK':
                     df = pd.DataFrame.from_dict(resp, orient='columns')
@@ -404,7 +406,8 @@ class WaPOR_API_class(object):
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(
+                    url=request_url))
 
 #    def _query_cubeInfo(self,cube_code):
 #        request_url = r'{0}{1}/cubes/{2}?overview=false'.format(self.path['catalog'],
@@ -488,7 +491,7 @@ class WaPOR_API_class(object):
             return cube_info
         else:
             raise ValueError(
-                'WaPOR ERROR: "{c_code}" is not available in WaPOR'.format(c_code=cube_code))
+                'WaPOR API ERROR: "{c_code}" is not available in WaPOR'.format(c_code=cube_code))
 
     def _query_cubeMeasures(self, cube_code):
         """Query cube measures
@@ -510,26 +513,27 @@ class WaPOR_API_class(object):
                 request_url)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
 
             try:
                 resp = resq_json['response']
+                # print(resp)
 
                 if resq_json['message'] == 'OK':
                     return resp[0]
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(
+                    url=request_url))
 
     def _query_cubeDimensions(self, cube_code):
         """Query cube dimensions
@@ -551,25 +555,25 @@ class WaPOR_API_class(object):
                 request_url)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
                 resp = resq_json['response']
+                # print(resp)
 
                 if resq_json['message'] == 'OK':
                     return resp
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(url=request_url))
 
     def getAvailData(self, cube_code, time_range = '2009-01-01,2018-12-31',
                      location = [], season = [], stage = [],
@@ -610,7 +614,7 @@ class WaPOR_API_class(object):
             # get dimension
             cube_dimensions = cube_info['dimension']
         except BaseException:
-            print('WaPOR ERROR: Cannot get cube info')
+            print('WaPOR API ERROR: Cannot get cube info')
 
         print('WaPOR API: Loading "{c_code}" data...'.format(c_code=cube_code))
 
@@ -629,6 +633,7 @@ class WaPOR_API_class(object):
                     }
                     dims_ls.append(time_dims)
                     rows_codes.append(time_dims_code)
+
                 if dims['type'] == 'WHAT':
                     dims_code = dims['code']
                     df_dims = self._query_dimensionsMembers(cube_code, dims_code)
@@ -654,9 +659,9 @@ class WaPOR_API_class(object):
             df = self._query_availData(cube_code, cube_measure_code,
                                        dims_ls, columns_codes, rows_codes)
         except BaseException:
-            print('WaPOR ERROR:Cannot get list of available data')
+            print('WaPOR API ERROR:Cannot get list of available data')
             return None
-        
+
         # sorted df
         keys = rows_codes + ['raster_id', 'bbox', 'time_code']
         df_dict = {i: [] for i in keys}
@@ -719,18 +724,18 @@ class WaPOR_API_class(object):
                 json=query_load)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
                 resp = resq_json['response']
+                # print(resp)
 
                 if resq_json['message'] == 'OK':
                     try:
@@ -738,11 +743,12 @@ class WaPOR_API_class(object):
                         # df = pd.DataFrame.from_dict(resp, orient='columns')
                         return df
                     except BaseException:
-                        print('WaPOR ERROR: Cannot get list of available data')
+                        print('WaPOR API ERROR: Cannot get list of available data')
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(
+                    url=request_url))
 
     def _query_dimensionsMembers(self, cube_code, dims_code):
         """Query dimensions members
@@ -765,29 +771,30 @@ class WaPOR_API_class(object):
                 request_url)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
                 resp = resq_json['response']
+                # print(resp)
 
                 if resq_json['message'] == 'OK':
                     try:
                         df = pd.DataFrame.from_dict(resp, orient='columns')
                         return df
                     except BaseException:
-                        print('WaPOR ERROR: Cannot get dimensions Members')
+                        print('WaPOR API ERROR: Cannot get dimensions Members')
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(
+                    url=request_url))
 
     def getLocations(self, version=None, level=None):
         """Get Locations
@@ -863,18 +870,18 @@ class WaPOR_API_class(object):
                 json=request_json)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
                 resp = resq_json['response']
+                # print(resp)
 
                 if resq_json['message'] == 'OK':
                     df_loc = pd.DataFrame.from_dict(resp, orient='columns')
@@ -892,7 +899,8 @@ class WaPOR_API_class(object):
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(
+                    url=request_url))
 
     def getRasterUrl(self, cube_code, rasterId, APIToken=""):
         """Get Raster Url
@@ -934,7 +942,7 @@ class WaPOR_API_class(object):
 
         request_headers = {
             'Authorization': "Bearer " + AccessToken}
-        request_params = {
+        request_json = {
             'language': 'en',
             'requestType': 'mapset_raster',
             'cubeCode': cube_code,
@@ -945,21 +953,21 @@ class WaPOR_API_class(object):
             resq = requests.get(
                 request_url, 
                 headers=request_headers,
-                params=request_params)
+                json=request_json)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
                 resp = resq_json['response']
+                # print(resp)
 
                 if resq_json['message'] == 'OK':
                     expiry_date = datetime.datetime.now() \
@@ -972,7 +980,8 @@ class WaPOR_API_class(object):
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(
+                    url=request_url))
 
     def getCropRasterURL(self, bbox, cube_code,
                          time_code, rasterId, APIToken=""):
@@ -1018,7 +1027,7 @@ class WaPOR_API_class(object):
                 if cube_dimension['type'] == 'TIME':
                     cube_dimension_code = cube_dimension['code']
         except BaseException:
-            print('WaPOR ERROR: Cannot get cube info')
+            print('WaPOR API ERROR: Cannot get cube info')
 
         print('WaPOR API: Loading "{c_code}" url from WaPOR{v}.L{l}...'.format(
             c_code=cube_code, v=self.version, l=self.level))
@@ -1090,14 +1099,13 @@ class WaPOR_API_class(object):
                 json=request_json)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
@@ -1115,12 +1123,13 @@ class WaPOR_API_class(object):
                         output = self._query_jobOutput(job_url)
                         return output
                     except BaseException:
-                        print('Error: Server response is empty')
+                        print('WaPOR API ERROR: Server response is empty')
                         return None
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(
+                    url=request_url))
 
     def getAreaTimeseries(self, shapefile_fh, cube_code,
                           time_range="2009-01-01,2018-12-31", APIToken=""):
@@ -1164,7 +1173,7 @@ class WaPOR_API_class(object):
                 if cube_dimension['type'] == 'TIME':
                     cube_dimension_code = cube_dimension['code']
         except BaseException:
-            print('WaPOR ERROR: Cannot get cube info')
+            print('WaPOR API ERROR: Cannot get cube info')
 
         print('WaPOR API: Loading "{c_code}" area timeseries...'.format(c_code=cube_code))
 
@@ -1216,14 +1225,13 @@ class WaPOR_API_class(object):
                 json=request_json)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
@@ -1241,12 +1249,12 @@ class WaPOR_API_class(object):
                         output = self._query_jobOutput(job_url)
                         return output
                     except BaseException:
-                        print('Error: Server response is empty')
+                        print('WaPOR API ERROR: Server response is empty')
                         return None
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(url=request_url))
 
     def _query_jobOutput(self, job_url):
         """Query Job output, url(str) or table(pd.DataFrame)
@@ -1267,25 +1275,24 @@ class WaPOR_API_class(object):
                     request_url)
                 resq.raise_for_status()
             except requests.exceptions.HTTPError as err:
-                print("Http Error:", err)
+                raise Exception("WaPOR API Http Error: {e}".format(e=err))
             except requests.exceptions.ConnectionError as err:
-                print("Error Connecting:", err)
+                raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
             except requests.exceptions.Timeout as err:
-                print("Timeout Error:", err)
+                raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
             except requests.exceptions.RequestException as err:
-                print("OOps: Something Else", err)
-                # sys.exit(1)
+                raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
             else:
                 resq_json = resq.json()
                 try:
                     resp = resq_json['response']
+                    # print(resp)
 
                     if resq_json['message'] == 'OK':
                         jobType = resp['type']
 
                         if self.print_job:
-                            print('  {i:d} {s}'.format(
-                                i=ijob, s=resp['status']))
+                            print('WaPOR API:  {i:d} {s}'.format(i=ijob, s=resp['status']))
 
                         if resp['status'] == 'COMPLETED':
                             contiue = False
@@ -1296,7 +1303,7 @@ class WaPOR_API_class(object):
                                 output = pd.DataFrame(
                                     results['items'], columns=results['header'])
                             else:
-                                print('WaPOR ERROR: Invalid jobType')
+                                print('WaPOR API ERROR: Invalid jobType')
                             return output
                         if resp['status'] == 'COMPLETED WITH ERRORS':
                             contiue = False
@@ -1307,7 +1314,7 @@ class WaPOR_API_class(object):
                     else:
                         print(resq_json['message'])
                 except BaseException:
-                    print('Error: Cannot get {url}'.format(url=request_url))
+                    print('WaPOR API ERROR: Cannot get {url}'.format(url=request_url))
 
             ijob += 1
 
@@ -1389,14 +1396,13 @@ class WaPOR_API_class(object):
                 json=request_json)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print("Http Error:", err)
+            raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
-            print("Error Connecting:", err)
+            raise Exception("WaPOR API Error Connecting: {e}".format(e=err))
         except requests.exceptions.Timeout as err:
-            print("Timeout Error:", err)
+            raise Exception("WaPOR API Timeout Error: {e}".format(e=err))
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
-            # sys.exit(1)
+            raise Exception("WaPOR API OOps: Something Else {e}".format(e=err))
         else:
             resq_json = resq.json()
             try:
@@ -1408,9 +1414,9 @@ class WaPOR_API_class(object):
                         df = pd.DataFrame(resp['items'], columns=resp['header'])
                         return df
                     except BaseException:
-                        print('Error: Server response is empty')
+                        print('WaPOR API ERROR: Server response is empty')
                         return None
                 else:
                     print(resq_json['message'])
             except BaseException:
-                print('Error: Cannot get {url}'.format(url=request_url))
+                print('WaPOR API ERROR: Cannot get {url}'.format(url=request_url))

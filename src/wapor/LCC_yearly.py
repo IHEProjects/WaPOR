@@ -46,26 +46,26 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     elif level == 2:
         cube_code = 'L2_LCC_A'
     else:
-        raise('WaPOR ERROR: This module only support level 1 and level 2 data. For higher level, use WaPORAPI module')
+        raise('WaPOR LCC ERROR: This module only support level 1 and level 2 data. For higher level, use WaPORAPI module')
 
     try:
         cube_info = WaPOR.API.getCubeInfo(
             cube_code, version=version, level=level)
         multiplier = cube_info['measure']['multiplier']
     except:
-        raise('WaPOR ERROR: Cannot get cube info. Check if WaPOR version has cube %s' % (
+        raise('WaPOR LCC ERROR: Cannot get cube info. Check if WaPOR version has cube %s' % (
             cube_code))
     finally:
         cube_info = None
 
     time_range = '{0},{1}'.format(Startdate, Enddate)
 
-    try:
-        df_avail = WaPOR.API.getAvailData(
-            cube_code, time_range=time_range, version=version, level=level)
-    except:
-        print('WaPOR ERROR: cannot get list of available data')
-        return None
+    df_avail = WaPOR.API.getAvailData(
+        cube_code, time_range=time_range, version=version, level=level)
+    # try:
+    # except:
+    #     print('WaPOR LCC ERROR: cannot get list of available data')
+    #     return None
 
     # if Waitbar == 1:
     #     import watools.Functions.Start.WaitbarConsole as WaitbarConsole
@@ -140,7 +140,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
             os.remove(download_file)
         except OSError as err:
             # if failed, report it back to the user
-            print("Error: %s - %s." % (err.filename, err.strerror))
+            print("WaPOR LCC ERROR: %s - %s." % (err.filename, err.strerror))
 
         # if Waitbar == 1:
         #     amount += 1
@@ -153,7 +153,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
 
 def checkMemory(txt=''):
     mem = psutil.virtual_memory()
-    print('WaPOR LCC: > Memory available      > {t} {v:.2f} MB'.format(
+    print('WaPOR LCC: > Memory available      : {t} {v:.2f} MB'.format(
         t=txt, v=mem.available / 1024 / 1024))
 
 

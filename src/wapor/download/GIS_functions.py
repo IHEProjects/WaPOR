@@ -39,7 +39,7 @@ def GetGeoInfo(fh, subdataset=0):
         Projection of fh.
     """
     print('WaPOR GIS: Getting Geo Information...')
-    checkMemory('Start')
+    checkMemory('GetGeoInfo Start')
 
     SourceDS = gdal.Open(fh, gdal.GA_ReadOnly)
 
@@ -78,7 +78,7 @@ def GetGeoInfo(fh, subdataset=0):
         v=subMeta, t=type(subMeta)))
 
     SourceDS = None
-    checkMemory('End')
+    checkMemory('GetGeoInfo End')
     return driver, subNDV, xsize, ysize, GeoT, Projection
 
 
@@ -104,7 +104,7 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False):
         Array with the pixel values.
     """
     print('WaPOR GIS: Opening file...')
-    checkMemory('Start')
+    checkMemory('OpenAsArray Start')
 
     datatypes = {
         "uint8": np.uint8, "int8": np.int8,
@@ -116,7 +116,7 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False):
         "Complex64": np.complex64, "Complex128": np.complex128, }
 
     DataSet = gdal.Open(fh, gdal.GA_ReadOnly)
-    checkMemory('Opened')
+    checkMemory('OpenAsArray Opened')
 
     Type = DataSet.GetDriver().ShortName
     if Type == 'HDF4':
@@ -137,13 +137,13 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False):
     Array = Subdataset.ReadAsArray()
     print('WaPOR GIS:   Band Array dtype      : {v} {sp} {sz}'.format(
         v=Array.dtype.name, sp=Array.shape, sz=Array.size))
-    checkMemory('Loaded')
+    checkMemory('OpenAsArray Loaded')
 
     # if nan_values:
     #     Array[Array == NDV] = np.nan
 
     DataSet = None
-    checkMemory('End')
+    checkMemory('OpenAsArray End')
     return Array
 
 
@@ -172,7 +172,7 @@ def CreateGeoTiff(fh, Array, driver, NDV, xsize, ysize, GeoT,
         Projection of fh.
     """
     print('WaPOR GIS: Creating tiff file...')
-    checkMemory('Start')
+    checkMemory('CreateGeoTiff Start')
 
     print('WaPOR GIS:   Array DataTypeName    : {t}'.format(
         t=Array.dtype.name))
@@ -223,7 +223,7 @@ def CreateGeoTiff(fh, Array, driver, NDV, xsize, ysize, GeoT,
     # if "nt" not in Array.dtype.name:
     #     Array[Array == NDV] = np.nan
 
-    checkMemory('End')
+    checkMemory('CreateGeoTiff End')
 
 
 def MatchProjResNDV(source_file, target_fhs, output_dir,
@@ -315,5 +315,5 @@ def MatchProjResNDV(source_file, target_fhs, output_dir,
 
 def checkMemory(txt=''):
     mem = psutil.virtual_memory()
-    print('WaPOR GIS: > Memory available      > {t} {v:.2f} MB'.format(
+    print('WaPOR GIS: > Memory available      : {t} {v:.2f} MB'.format(
         t=txt, v=mem.available / 1024 / 1024))
