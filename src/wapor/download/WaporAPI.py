@@ -14,6 +14,7 @@ import pandas as pd
 
 TIME_EXPIRES_BEFORE_SECOND = 120  # From API expires time is 3600-120sec
 # TIME_EXPIRES_BEFORE_SECOND = 600  # From API expires time is 3600-600sec
+TIME_REQUEST_AFTER_SECOND = 600  # Request start time+600sec
 TIME_SLEEP_SECOND = 2
 
 
@@ -1282,6 +1283,7 @@ class WaPOR_API_class(object):
 
         ijob = 0
         contiue = True
+        wait_time = 0
         if self.print_job:
             print(request_url)
 
@@ -1323,12 +1325,27 @@ class WaPOR_API_class(object):
                             else:
                                 print('WaPOR API ERROR: Invalid jobType')
                             return output
-                        if resp['status'] == 'COMPLETED WITH ERRORS':
+                        elif resp['status'] == 'COMPLETED WITH ERRORS':
                             contiue = False
-                            print(resp['log'])
-                        else:
-                            # 'WAITING' or 'RUNNING'
+                            print(resp['log'][-1])
+                        elif resp['status'] == 'WAITING':
+                            contiue = True
                             time.sleep(TIME_SLEEP_SECOND)
+                            wait_time += TIME_SLEEP_SECOND
+                            if wait_time > TIME_REQUEST_AFTER_SECOND:
+                                contiue = False
+                                print(resp['log'][-1])
+                        elif resp['status'] == 'RUNNING':
+                            contiue = True
+                            time.sleep(TIME_SLEEP_SECOND)
+                            wait_time += TIME_SLEEP_SECOND
+                            if wait_time > TIME_REQUEST_AFTER_SECOND:
+                                contiue = False
+                                print(resp['log'][-1])
+                        else:
+                            raise Exception('WaPOR API ERROR:'
+                                            ' Unkown status "{s}".'.format(
+                                s=resp['status']))
                     else:
                         print(resq_json['message'])
                 except BaseException:
