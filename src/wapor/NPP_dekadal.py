@@ -55,13 +55,13 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
                 print('%s: %s' % (row['caption'], row['code']))
         cube_code = input('Insert Level 3 cube code for the selected area: ')
     else:
-        print('Invalid Level')
+        raise Exception('Invalid Level')
 
     try:
         cube_info = WaPOR.API.getCubeInfo(
             cube_code, version=version, level=level)
         multiplier = cube_info['measure']['multiplier']
-    except:
+    except BaseException:
         raise('WaPOR NPP ERROR: Cannot get cube info.'
               ' Check if WaPOR version has cube %s' % (cube_code))
     finally:
@@ -96,8 +96,9 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         print('WaPOR NPP: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'NPP_WAPOR.v%s_mm-dekad-1_%s.tif' % (
-            version, row['raster_id'])
+        filename = 'NPP_WAPOR.v%s_level%s_mm-dekad-1_%s.tif' % (
+            version, level,
+            row['raster_id'])
         outfilename = os.path.join(Dir, filename)
         print('WaPOR NPP: Local      file :', outfilename)
 

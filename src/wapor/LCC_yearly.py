@@ -46,16 +46,17 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     elif level == 2:
         cube_code = 'L2_LCC_A'
     else:
-        raise('WaPOR LCC ERROR: This module only support level 1 and level 2 data.'
-              ' For higher level, use WaPORAPI module')
+        raise Exception('WaPOR LCC ERROR: This module'
+                        ' only support level 1 and level 2 data.'
+                        ' For higher level, use WaPORAPI module')
 
     try:
         cube_info = WaPOR.API.getCubeInfo(
             cube_code, version=version, level=level)
         multiplier = cube_info['measure']['multiplier']
-    except:
-        raise('WaPOR LCC ERROR: Cannot get cube info.'
-              ' Check if WaPOR version has cube %s' % (cube_code))
+    except BaseException:
+        raise Exception('WaPOR LCC ERROR: Cannot get cube info.'
+                        ' Check if WaPOR version has cube %s' % (cube_code))
     finally:
         cube_info = None
 
@@ -89,8 +90,9 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
 
         # Local raster file name
         # Date = datetime.strptime(row['YEAR'], '%Y')
-        filename = 'LCC_WAPOR.v2.0_level%s_annually_%s.tif' % (
-            level, datetime.strptime(row['YEAR'], '%Y').strftime('%Y'))
+        filename = 'LCC_WAPOR.v%s_level%s-annually-1_%s.tif' % (
+            version, level,
+            datetime.strptime(row['YEAR'], '%Y').strftime('%Y'))
         outfilename = os.path.join(Dir, filename)
         print('WaPOR LCC: Local      file :', outfilename)
 

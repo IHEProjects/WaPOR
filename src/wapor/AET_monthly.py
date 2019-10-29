@@ -12,6 +12,7 @@ import requests
 import numpy as np
 
 import download as WaPOR
+
 try:
     from .download import GIS_functions as gis
 except ImportError:
@@ -37,25 +38,18 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
 
     # Download data
     # WaPOR.API.version = version
-    # catalog = WaPOR.API.getCatalog(version, level, True)
+    # catalog = WaPOR.API.getCatalog()
 
     bbox = [lonlim[0], latlim[0], lonlim[1], latlim[1]]
 
     if level == 1:
-        cube_code = 'L1_AETI_D'
+        cube_code = 'L1_AETI_M'
     elif level == 2:
-        cube_code = 'L2_AETI_D'
-    elif level == 3:
-        print('WaPOR AET: Level 3 data only available in some areas'
-              ' with specific data cube code below: ')
-
-        catalog = WaPOR.API.getCatalog(version, level, True)
-        for i, row in catalog.iterrows():
-            if ('L3_AETI' in row['code']) & ('_D' in row['code']):
-                print('%s: %s' % (row['caption'], row['code']))
-        cube_code = input('Insert Level 3 cube code for the selected area: ')
+        cube_code = 'L2_AETI_M'
     else:
-        raise Exception('Invalid Level')
+        raise Exception('WaPOR AET ERROR: This module'
+                        ' only support level 1 and level 2 data.'
+                        ' For higher level, use WaPORAPI module')
 
     try:
         cube_info = WaPOR.API.getCubeInfo(
@@ -73,15 +67,15 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         cube_code, time_range=time_range, version=version, level=level)
     # try:
     # except:
-    #     print('WaPOR AET ERROR: cannot get list of available data')
+    #     print('ERROR: cannot get list of available data')
     #     return None
 
     # if Waitbar == 1:
     #     import watools.Functions.Start.WaitbarConsole as WaitbarConsole
     #     total_amount = len(df_avail)
     #     amount = 0
-    #     WaitbarConsole.printWaitBar(
-    #         amount, total_amount, prefix='Progress:', suffix='Complete', length=50)
+    #     WaitbarConsole.printWaitBar(amount, total_amount, prefix='Progress:',
+    #                                 suffix='Complete', length=50)
 
     Dir = os.path.join(Dir, cube_code)
     if not os.path.exists(Dir):
@@ -96,9 +90,10 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         print('WaPOR AET: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'AETI_WAPOR.v%s_level%s_mm-dekad-1_%s.tif' % (
+        filename = 'AET_WAPOR.v%s_level%s_mm-month-1_%s.%02s.tif' % (
             version, level,
-            row['raster_id'])
+            datetime.strptime(row['MONTH'], '%Y-%m').strftime('%Y'),
+            datetime.strptime(row['MONTH'], '%Y-%m').strftime('%m'))
         outfilename = os.path.join(Dir, filename)
         print('WaPOR AET: Local      file :', outfilename)
 
@@ -113,6 +108,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
             fp.write(resp.content)
         resp = None
         checkMemory('{} Downloading end'.format(index))
+
 
         # GDAL download_file * multiplier => outfilename
         driver, NDV, xsize, ysize, GeoT, Projection = gis.GetGeoInfo(
@@ -129,8 +125,6 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
             v=NDV, t=NDV.dtype.name))
         print('WaPOR AET: multiplier    : {v} {t}'.format(
             v=multiplier, t=multiplier.dtype.name))
-
-        # Array = np.where(Array < 0, 0, Array)  # mask out flagged value -9998
 
         NDV = NDV * multiplier
         Array = Array * multiplier
@@ -159,6 +153,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         #                                 prefix='Progress:',
         #                                 suffix='Complete',
         #                                 length=50)
+    checkMemory('End')
 
 
 def checkMemory(txt=''):
