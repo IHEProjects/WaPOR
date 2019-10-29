@@ -9,11 +9,11 @@ Contact: b.tran@un-ihe.org
 import requests
 import time
 import datetime
-import json
+# import json
 import pandas as pd
 
-TIME_EXPIRES_BEFORE_SECOND = 120  # From API expires time is 3600sec
-# TIME_EXPIRES_BEFORE_SECOND = 600  # From API expires time is 3600sec
+TIME_EXPIRES_BEFORE_SECOND = 120  # From API expires time is 3600-120sec
+# TIME_EXPIRES_BEFORE_SECOND = 600  # From API expires time is 3600-600sec
 TIME_SLEEP_SECOND = 2
 
 
@@ -72,17 +72,23 @@ class WaPOR_API_class(object):
         }
 
         self.path = {
-            'catalog': 'https://io.apps.fao.org/gismgr/api/v1/catalog/workspaces/',
-            'sign_in': 'https://io.apps.fao.org/gismgr/api/v1/iam/sign-in/',
-            'refresh': 'https://io.apps.fao.org/gismgr/api/v1/iam/token',
-            'download': 'https://io.apps.fao.org/gismgr/api/v1/download/',
-            'query': 'https://io.apps.fao.org/gismgr/api/v1/query/',
-            'jobs': 'https://io.apps.fao.org/gismgr/api/v1/catalog/workspaces/WAPOR/jobs/'
+            'catalog': 'https://io.apps.fao.org/gismgr/api/v1/'
+                       'catalog/workspaces/',
+            'sign_in': 'https://io.apps.fao.org/gismgr/api/v1/'
+                       'iam/sign-in/',
+            'refresh': 'https://io.apps.fao.org/gismgr/api/v1/'
+                       'iam/token',
+            'download': 'https://io.apps.fao.org/gismgr/api/v1/'
+                        'download/',
+            'query': 'https://io.apps.fao.org/gismgr/api/v1/'
+                     'query/',
+            'jobs': 'https://io.apps.fao.org/gismgr/api/v1/'
+                    'catalog/workspaces/WAPOR/jobs/'
         }
 
         # Dynamic assigned in the functions
         self.wkspaces = None
-        
+
         self.catalog = None
 
         self.locationsTable = None
@@ -105,7 +111,8 @@ class WaPOR_API_class(object):
         Token = self._query_accessToken(APIToken)
         if Token is None:
             raise Exception(
-                'WaPOR API ERROR: The data with specified level version is not available in this version')
+                'WaPOR API ERROR: The data with specified level version'
+                ' is not available in this version')
         else:
             self.token = {
                 'API': APIToken,
@@ -182,7 +189,8 @@ class WaPOR_API_class(object):
 
             if Token is None:
                 raise Exception(
-                    'WaPOR API ERROR: The data with specified level version is not available in this version')
+                    'WaPOR API ERROR: The data with specified level version'
+                    ' is not available in this version')
             else:
                 self.token['Access'] = Token['accessToken']
                 self.token['Refresh'] = Token['refreshToken']
@@ -203,8 +211,8 @@ class WaPOR_API_class(object):
             print(request_url)
 
         request_json = {
-                    'grandType': 'refresh_token',
-                    'refreshToken': RefreshToken}
+            'grandType': 'refresh_token',
+            'refreshToken': RefreshToken}
 
         # requests
         try:
@@ -242,7 +250,8 @@ class WaPOR_API_class(object):
         df = self._query_workspaces()
         if df is None:
             raise Exception(
-                'WaPOR API ERROR: The data with specified level version is not available in this version')
+                'WaPOR API ERROR: The data with specified level version'
+                ' is not available in this version')
         else:
             self.wkspaces = df
             return self.wkspaces
@@ -350,19 +359,22 @@ class WaPOR_API_class(object):
                 self.version = version
             else:
                 raise ValueError(
-                    'WaPOR API ERROR: _query_catalog: Version "{v}" is not correct!'.format(v=version))
+                    'WaPOR API ERROR: _query_catalog: Version "{v}"'
+                    ' is not correct!'.format(v=version))
 
         if isinstance(level, int):
             if 0 < level < 4:
                 self.level = level
             else:
                 raise ValueError(
-                    'WaPOR API ERROR: _query_catalog: level "{l}" is not correct!'.format(l=level))
+                    'WaPOR API ERROR: _query_catalog: level "{l}"'
+                    ' is not correct!'.format(l=level))
         elif level is None:
-                self.version = version
+            self.version = version
         else:
             raise ValueError(
-                'WaPOR API ERROR: _query_catalog: level "{l}" is not correct!'.format(l=level))
+                'WaPOR API ERROR: _query_catalog: level "{l}"'
+                ' is not correct!'.format(l=level))
 
         if self.level is None:
             base_url = '{0}{1}/cubes?overview=false&paged=false'
@@ -409,16 +421,16 @@ class WaPOR_API_class(object):
                 print('WaPOR API ERROR: Cannot get {url}'.format(
                     url=request_url))
 
-#    def _query_cubeInfo(self,cube_code):
-#        request_url = r'{0}{1}/cubes/{2}?overview=false'.format(self.path['catalog'],
-#        self.workspaces[self.version],cube_code)
-#        resp = requests.get(request_url)
-#        try:
-#            meta_data_items = resp.json()['response']
-#            cube_info=meta_data_items #['additionalInfo']
-#        except:
-#            cube_info=None
-#        return cube_info
+    # def _query_cubeInfo(self,cube_code):
+    #     request_url = r'{0}{1}/cubes/{2}?overview=false'.format(self.path['catalog'],
+    #     self.workspaces[self.version],cube_code)
+    #     resp = requests.get(request_url)
+    #     try:
+    #         meta_data_items = resp.json()['response']
+    #         cube_info=meta_data_items #['additionalInfo']
+    #     except:
+    #         cube_info=None
+    #     return cube_info
 
     def getCubeInfo(self, cube_code, version=None, level=None):
         """Get cube info
@@ -431,7 +443,7 @@ class WaPOR_API_class(object):
             WaPOR workspace version, default 2.
         level: int, optional
             Data resolution level, default None.
-        
+
         Returns
         -------
         cube_info: dict
@@ -491,7 +503,8 @@ class WaPOR_API_class(object):
             return cube_info
         else:
             raise ValueError(
-                'WaPOR API ERROR: "{c_code}" is not available in WaPOR'.format(c_code=cube_code))
+                'WaPOR API ERROR: "{c_code}" is not available in WaPOR'.format(
+                    c_code=cube_code))
 
     def _query_cubeMeasures(self, cube_code):
         """Query cube measures
@@ -541,7 +554,7 @@ class WaPOR_API_class(object):
         # print('WaPOR API:   _query_cubeDimensions')
 
         base_url = '{0}{1}/cubes/{2}/dimensions?overview=false&paged=false'
-        request_url=base_url.format(
+        request_url = base_url.format(
             self.path['catalog'],
             self.workspaces[self.version],
             cube_code)
@@ -575,8 +588,8 @@ class WaPOR_API_class(object):
             except BaseException:
                 print('WaPOR API ERROR: Cannot get {url}'.format(url=request_url))
 
-    def getAvailData(self, cube_code, time_range = '2009-01-01,2018-12-31',
-                     location = [], season = [], stage = [],
+    def getAvailData(self, cube_code, time_range='2009-01-01,2018-12-31',
+                     location=[], season=[], stage=[],
                      version=None, level=None):
         """Get Available Data
 
@@ -618,16 +631,16 @@ class WaPOR_API_class(object):
 
         print('WaPOR API: Loading "{c_code}" data...'.format(c_code=cube_code))
 
-        dims_ls=[]
-        columns_codes=['MEASURES']
-        rows_codes=[]
+        dims_ls = []
+        columns_codes = ['MEASURES']
+        rows_codes = []
         try:
             for dims in cube_dimensions:
                 if dims['type'] == 'TIME':  # get time dims
-                    time_dims_code=dims['code']
-                    df_time=self._query_dimensionsMembers(cube_code, time_dims_code)
+                    time_dims_code = dims['code']
+                    df_time = self._query_dimensionsMembers(cube_code, time_dims_code)
 
-                    time_dims={
+                    time_dims = {
                         "code": time_dims_code,
                         "range": '[{0})'.format(time_range)
                     }
@@ -811,7 +824,8 @@ class WaPOR_API_class(object):
         locations: :obj:`pandas.DataFrame`
             Locations table.
         """
-        print('WaPOR API: Loading locations WaPOR_{v}.L{l}...'.format(v=version, l=level))
+        print(
+            'WaPOR API: Loading locations WaPOR_{v}.L{l}...'.format(v=version, l=level))
 
         self.version = 2
         self.level = None
@@ -892,7 +906,7 @@ class WaPOR_API_class(object):
                     df_BAS = df_loc.loc[(df_loc["l2"] == True) &
                                         (df_loc["type"] == 'BASIN')]
                     self.list_countries = [rows['code']
-                                        for index, rows in df_CTY.iterrows()]
+                                           for index, rows in df_CTY.iterrows()]
                     self.list_basins = [rows['code']
                                         for index, rows in df_BAS.iterrows()]
                     return df_loc
@@ -951,7 +965,7 @@ class WaPOR_API_class(object):
         # requests
         try:
             resq = requests.get(
-                request_url, 
+                request_url,
                 headers=request_headers,
                 json=request_json)
             resq.raise_for_status()
@@ -971,7 +985,7 @@ class WaPOR_API_class(object):
 
                 if resq_json['message'] == 'OK':
                     expiry_date = datetime.datetime.now() \
-                        + datetime.timedelta(seconds=int(resp['expiresIn']))
+                                  + datetime.timedelta(seconds=int(resp['expiresIn']))
 
                     output = {
                         'url': resp['downloadUrl'],
@@ -996,9 +1010,11 @@ class WaPOR_API_class(object):
         cube_code: str
             Cube code.
         time_code: str
-            Time code, from Available Data table "raster_id", ex. "[2009-01-01,2009-02-01)".
+            Time code, from Available Data table "raster_id",
+            ex. "[2009-01-01,2009-02-01)".
         rasterId: str
-            Raster ID, from Available Data table "raster_id", ex. "L1_PCP_0901M".
+            Raster ID, from Available Data table "raster_id",
+            ex. "L1_PCP_0901M".
         APIToken: str
             WaPOR API Token.
 
@@ -1175,7 +1191,8 @@ class WaPOR_API_class(object):
         except BaseException:
             print('WaPOR API ERROR: Cannot get cube info')
 
-        print('WaPOR API: Loading "{c_code}" area timeseries...'.format(c_code=cube_code))
+        print(
+            'WaPOR API: Loading "{c_code}" area timeseries...'.format(c_code=cube_code))
 
         # get shapefile info
         import ogr
@@ -1292,7 +1309,8 @@ class WaPOR_API_class(object):
                         jobType = resp['type']
 
                         if self.print_job:
-                            print('WaPOR API:  {i:d} {s}'.format(i=ijob, s=resp['status']))
+                            print('WaPOR API:  {i:d} {s}'.format(i=ijob,
+                                                                 s=resp['status']))
 
                         if resp['status'] == 'COMPLETED':
                             contiue = False
@@ -1350,7 +1368,8 @@ class WaPOR_API_class(object):
             if dims['type'] == 'TIME':
                 cube_dimension_code = dims['code']
 
-        print('WaPOR API: Loading "{c_code}" point timeseries...'.format(c_code=cube_code))
+        print('WaPOR API: Loading "{c_code}" point timeseries...'.format(
+            c_code=cube_code))
 
         # query load
         base_url = '{0}'

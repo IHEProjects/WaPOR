@@ -31,8 +31,8 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     latlim -- [ymin, ymax] (values must be between -40.05 and 40.05)
     lonlim -- [xmin, xmax] (values must be between -30.05 and 65.05)
     """
-    print('WaPOR AET: Download dekadal WaPOR Actual Evapotranspiration data for the period %s till %s' % (
-        Startdate, Enddate))
+    print('WaPOR AET: Download dekadal WaPOR Actual Evapotranspiration data'
+          ' for the period %s till %s' % (Startdate, Enddate))
     checkMemory('Start')
 
     # Download data
@@ -46,7 +46,8 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     elif level == 2:
         cube_code = 'L2_AETI_D'
     elif level == 3:
-        print('WaPOR AET: Level 3 data only available in some areas with specific data cube code below: ')
+        print('WaPOR AET: Level 3 data only available in some areas'
+              ' with specific data cube code below: ')
 
         catalog = WaPOR.API.getCatalog(version, level, True)
         for i, row in catalog.iterrows():
@@ -61,8 +62,8 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
             cube_code, version=version, level=level)
         multiplier = cube_info['measure']['multiplier']
     except:
-        raise('WaPOR AET ERROR: Cannot get cube info. Check if WaPOR version has cube %s' % (
-            cube_code))
+        raise('WaPOR AET ERROR: Cannot get cube info.'
+              ' Check if WaPOR version has cube %s' % (cube_code))
     finally:
         cube_info = None
 
@@ -168,7 +169,7 @@ def checkMemory(txt=''):
 if __name__ == "__main__":
     dir_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        '../', '../', 'tests', 'data'
+        '../', '../', 'tests', 'data', 'Download'
     )
     main(Dir=dir_path, Startdate='2009-01-01', Enddate='2018-12-31',
          #  latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],

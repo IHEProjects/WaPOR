@@ -31,8 +31,8 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     latlim -- [ymin, ymax] (values must be between -40.05 and 40.05)
     lonlim -- [xmin, xmax] (values must be between -30.05 and 65.05)
     """
-    print('WaPOR LCC: Download yearly WaPOR Land Cover Class data for the period %s till %s' % (
-        Startdate, Enddate))
+    print('WaPOR LCC: Download yearly WaPOR Land Cover Class data'
+          ' for the period %s till %s' % (Startdate, Enddate))
     checkMemory('Start')
 
     # Download data
@@ -46,15 +46,16 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     elif level == 2:
         cube_code = 'L2_LCC_A'
     else:
-        raise('WaPOR LCC ERROR: This module only support level 1 and level 2 data. For higher level, use WaPORAPI module')
+        raise('WaPOR LCC ERROR: This module only support level 1 and level 2 data.'
+              ' For higher level, use WaPORAPI module')
 
     try:
         cube_info = WaPOR.API.getCubeInfo(
             cube_code, version=version, level=level)
         multiplier = cube_info['measure']['multiplier']
     except:
-        raise('WaPOR LCC ERROR: Cannot get cube info. Check if WaPOR version has cube %s' % (
-            cube_code))
+        raise('WaPOR LCC ERROR: Cannot get cube info.'
+              ' Check if WaPOR version has cube %s' % (cube_code))
     finally:
         cube_info = None
 
@@ -160,7 +161,7 @@ def checkMemory(txt=''):
 if __name__ == "__main__":
     dir_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        '../', '../', 'tests', 'data'
+        '../', '../', 'tests', 'data', 'Download'
     )
     main(Dir=dir_path, Startdate='2009-01-01', Enddate='2018-12-31',
          latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],
