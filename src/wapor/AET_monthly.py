@@ -99,8 +99,8 @@ def main(APIToken='',
         print('WaPOR AET: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'AET_WAPOR.v%s_level%s_mm-month-1_%s.%02s.tif' % (
-            version, level,
+        filename = 'AET_WAPOR.v%s_level%s_%s-month-1_%s.%02s.tif' % (
+            version, level, unit,
             datetime.strptime(row['MONTH'], '%Y-%m').strftime('%Y'),
             datetime.strptime(row['MONTH'], '%Y-%m').strftime('%m'))
         outfilename = os.path.join(Dir, filename)

@@ -106,8 +106,8 @@ def main(APIToken='',
         print('WaPOR NPP: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'NPP_WAPOR.v%s_level%s_mm-dekad-1_%s.tif' % (
-            version, level,
+        filename = 'NPP_WAPOR.v%s_level%s_%s-dekad-1_%s.tif' % (
+            version, level, unit,
             row['raster_id'])
         outfilename = os.path.join(Dir, filename)
         print('WaPOR NPP: Local      file :', outfilename)

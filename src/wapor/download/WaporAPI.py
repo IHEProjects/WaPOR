@@ -382,14 +382,14 @@ class WaPOR_API_class(object):
                 self.level = level
             else:
                 raise ValueError(
-                    'WaPOR API ERROR: _query_catalog: level "{l}"'
-                    ' is not correct!'.format(l=level))
+                    'WaPOR API ERROR: _query_catalog: level "{lv}"'
+                    ' is not correct!'.format(lv=level))
         elif level is None:
             self.version = version
         else:
             raise ValueError(
-                'WaPOR API ERROR: _query_catalog: level "{l}"'
-                ' is not correct!'.format(l=level))
+                'WaPOR API ERROR: _query_catalog: level "{lv}"'
+                ' is not correct!'.format(lv=level))
 
         if self.level is None:
             base_url = '{0}{1}/cubes?overview=false&paged=false'

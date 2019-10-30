@@ -97,8 +97,8 @@ def main(APIToken='',
         print('WaPOR RET: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'RET_WAPOR.v%s_level%s_mm-annually-1_%s.tif' % (
-            version, level,
+        filename = 'RET_WAPOR.v%s_level%s_%s-annually-1_%s.tif' % (
+            version, level, unit,
             datetime.strptime(row['YEAR'], '%Y').strftime('%Y'))
         outfilename = os.path.join(Dir, filename)
         print('WaPOR RET: Local      file :', outfilename)

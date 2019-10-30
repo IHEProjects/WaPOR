@@ -100,8 +100,8 @@ def main(APIToken='',
 
         # Local raster file name
         # Date = datetime.strptime(row['YEAR'], '%Y')
-        filename = 'LCC_WAPOR.v%s_level%s-annually-1_%s.tif' % (
-            version, level,
+        filename = 'LCC_WAPOR.v%s_level%s_%s-annually-1_%s.tif' % (
+            version, level, unit,
             datetime.strptime(row['YEAR'], '%Y').strftime('%Y'))
         outfilename = os.path.join(Dir, filename)
         print('WaPOR LCC: Local      file :', outfilename)
