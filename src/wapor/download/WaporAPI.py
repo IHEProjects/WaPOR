@@ -260,7 +260,6 @@ class WaPOR_API_class(object):
         print('WaPOR API: Loading workspace...')
         self.isAPITokenSet()
 
-
         df = self._query_workspaces()
         if df is None:
             raise Exception(
@@ -326,7 +325,8 @@ class WaPOR_API_class(object):
         catalog: :obj:`pandas.DataFrame`
             Catalog table.
         """
-        print('WaPOR API: Loading catalog WaPOR_{v}.L{l}...'.format(v=version, l=level))
+        print('WaPOR API: Loading catalog WaPOR_{v}.L{lv}...'.format(
+            v=version, lv=level))
         self.isAPITokenSet()
 
         isFound = False
@@ -344,13 +344,13 @@ class WaPOR_API_class(object):
         if isFound:
             df = self.catalog
 
-            print('WaPOR API: Loading catalog WaPOR_{v}.L{l} found.'.format(
-                v=version, l=level))
+            print('WaPOR API: Loading catalog WaPOR_{v}.L{lv} found.'.format(
+                v=version, lv=level))
         else:
             df = self._query_catalog(version, level)
 
-            print('WaPOR API: Loading catalog WaPOR_{v}.L{l} loaded.'.format(
-                v=version, l=level))
+            print('WaPOR API: Loading catalog WaPOR_{v}.L{lv} loaded.'.format(
+                v=version, lv=level))
 
         if cubeInfo:
             cubes_measure = []
@@ -511,8 +511,8 @@ class WaPOR_API_class(object):
                 isFound = True
 
         if isFound:
-            print('WaPOR API: "{c_code}" is found in WaPOR_{v}.L{l}'.format(
-                c_code=cube_code, v=version, l=level))
+            print('WaPOR API: "{c_code}" is found in WaPOR_{v}.L{lv}'.format(
+                c_code=cube_code, v=version, lv=level))
 
             catalog = self.getCatalog(version, level, cubeInfo=True)
             cube_info = catalog.loc[catalog['code'] == cube_code].to_dict('records')[0]
@@ -633,7 +633,7 @@ class WaPOR_API_class(object):
         """
         # Check AccessToken expires
         self.isAPITokenExpired()
-        AccessToken = self.token['Access']
+        # AccessToken = self.token['Access']
 
         # Get measure_code and dimension_code
         try:
@@ -725,7 +725,7 @@ class WaPOR_API_class(object):
         if self.print_job:
             print(request_url)
 
-        query_load = {
+        request_json = {
             "type": "MDAQuery_Table",
             "params": {
                 "properties": {
@@ -750,7 +750,7 @@ class WaPOR_API_class(object):
         try:
             resq = requests.post(
                 request_url,
-                json=query_load)
+                json=request_json)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
             raise Exception("WaPOR API Http Error: {e}".format(e=err))
@@ -841,7 +841,8 @@ class WaPOR_API_class(object):
             Locations table.
         """
         print(
-            'WaPOR API: Loading locations WaPOR_{v}.L{l}...'.format(v=version, l=level))
+            'WaPOR API: Loading locations WaPOR_{v}.L{lv}...'.format(
+                v=version, lv=level))
         self.isAPITokenSet()
 
         self.version = 2
@@ -853,15 +854,14 @@ class WaPOR_API_class(object):
             if 0 < level < 4:
                 self.level = level
 
-        if self.locationsTable is None:
-            df_loc = self._query_locations(version, level)
+        if self.locationsTable is not None:
             df_loc = self.locationsTable
         else:
+            df_loc = self._query_locations(version, self.level)
             df_loc = self.locationsTable
 
-        if level is not None:
-            self.level = level
-            df_loc = df_loc.loc[df_loc["l{0}".format(self.level)] == True]
+        if self.level is not None:
+            df_loc = df_loc.loc[df_loc["l{0}".format(self.level)]]
         return df_loc
 
     def _query_locations(self, version=None, level=None):
@@ -918,12 +918,14 @@ class WaPOR_API_class(object):
                     df_loc = pd.DataFrame.from_dict(resp, orient='columns')
 
                     self.locationsTable = df_loc
-                    df_CTY = df_loc.loc[(df_loc["l2"] == True) &
+                    df_CTY = df_loc.loc[(df_loc["l2"]) &
                                         (df_loc["type"] == 'COUNTRY')]
-                    df_BAS = df_loc.loc[(df_loc["l2"] == True) &
+                    df_BAS = df_loc.loc[(df_loc["l2"]) &
                                         (df_loc["type"] == 'BASIN')]
+
                     self.list_countries = [rows['code']
                                            for index, rows in df_CTY.iterrows()]
+
                     self.list_basins = [rows['code']
                                         for index, rows in df_BAS.iterrows()]
                     return df_loc
@@ -952,8 +954,8 @@ class WaPOR_API_class(object):
         self.isAPITokenExpired()
         AccessToken = self.token['Access']
 
-        print('WaPOR API: Loading "{c_code}" url from WaPOR{v}.L{l}...'.format(
-            c_code=cube_code, v=self.version, l=self.level))
+        print('WaPOR API: Loading "{c_code}" url from WaPOR{v}.L{lv}...'.format(
+            c_code=cube_code, v=self.version, lv=self.level))
 
         download_url = self._query_rasterUrl(cube_code, rasterId, AccessToken)
         return download_url
@@ -973,7 +975,7 @@ class WaPOR_API_class(object):
 
         request_headers = {
             'Authorization': "Bearer " + AccessToken}
-        request_json = {
+        request_params = {
             'language': 'en',
             'requestType': 'mapset_raster',
             'cubeCode': cube_code,
@@ -984,7 +986,7 @@ class WaPOR_API_class(object):
             resq = requests.get(
                 request_url,
                 headers=request_headers,
-                json=request_json)
+                params=request_params)
             resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
             raise Exception("WaPOR API Http Error: {e}".format(e=err))
@@ -1015,7 +1017,7 @@ class WaPOR_API_class(object):
                     url=request_url))
 
     def getCropRasterURL(self, bbox, cube_code,
-                         time_code, rasterId, APIToken=""):
+                         time_code, rasterId):
         """Get Crop Raster Url
 
         Do need Authorization
@@ -1032,8 +1034,6 @@ class WaPOR_API_class(object):
         rasterId: str
             Raster ID, from Available Data table "raster_id",
             ex. "L1_PCP_0901M".
-        APIToken: str
-            WaPOR API Token.
 
         Returns
         -------
@@ -1062,8 +1062,8 @@ class WaPOR_API_class(object):
         except BaseException:
             print('WaPOR API ERROR: Cannot get cube info')
 
-        print('WaPOR API: Loading "{c_code}" url from WaPOR{v}.L{l}...'.format(
-            c_code=cube_code, v=self.version, l=self.level))
+        print('WaPOR API: Loading "{c_code}" url from WaPOR{v}.L{lv}...'.format(
+            c_code=cube_code, v=self.version, lv=self.level))
 
         # Create Polygon
         xmin, ymin, xmax, ymax = bbox[0], bbox[1], bbox[2], bbox[3]
@@ -1370,8 +1370,8 @@ class WaPOR_API_class(object):
                                 print(resp['log'][-1])
                         else:
                             raise Exception('WaPOR API ERROR:'
-                                            ' Unkown status "{s}".'.format(
-                                s=resp['status']))
+                                            ' Unkown status'
+                                            ' "{s}".'.format(s=resp['status']))
                     else:
                         print(resq_json['message'])
                 except BaseException:

@@ -5,7 +5,7 @@ Created on Tue Jul 23 11:25:33 2019
 @author: ntr002
 """
 import os
-from datetime import datetime
+# from datetime import datetime
 import psutil
 import requests
 
@@ -66,13 +66,14 @@ def main(APIToken='',
     else:
         raise Exception('Invalid Level')
 
+    cube_info = WaPOR.API.getCubeInfo(
+        cube_code, version=version, level=level)
     try:
-        cube_info = WaPOR.API.getCubeInfo(
-            cube_code, version=version, level=level)
         multiplier = cube_info['measure']['multiplier']
+        unit = cube_info['measure']['unit']
     except BaseException:
-        raise('WaPOR NPP ERROR: Cannot get cube info.'
-              ' Check if WaPOR version has cube %s' % (cube_code))
+        raise Exception('WaPOR NPP ERROR: Cannot get cube info.'
+                        ' Check if WaPOR version has cube %s' % (cube_code))
     finally:
         cube_info = None
 
@@ -116,8 +117,7 @@ def main(APIToken='',
         resp = requests.get(WaPOR.API.getCropRasterURL(bbox,
                                                        cube_code,
                                                        row['time_code'],
-                                                       row['raster_id'],
-                                                       WaPOR.API.token['Access']))
+                                                       row['raster_id']))
         with open(download_file, 'wb') as fp:
             fp.write(resp.content)
         resp = None

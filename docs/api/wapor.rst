@@ -1,6 +1,13 @@
 wapor package
 =============
 
+Subpackages
+-----------
+
+.. toctree::
+
+    wapor.download
+
 Submodules
 ----------
 
@@ -12,10 +19,26 @@ wapor.AET\_dekadal module
     :undoc-members:
     :show-inheritance:
 
-wapor.GIS\_functions module
----------------------------
+wapor.AET\_monthly module
+-------------------------
 
-.. automodule:: wapor.GIS_functions
+.. automodule:: wapor.AET_monthly
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+wapor.AET\_yearly module
+------------------------
+
+.. automodule:: wapor.AET_yearly
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+wapor.I\_yearly module
+----------------------
+
+.. automodule:: wapor.I_yearly
     :members:
     :undoc-members:
     :show-inheritance:
@@ -36,10 +59,42 @@ wapor.NPP\_dekadal module
     :undoc-members:
     :show-inheritance:
 
-wapor.WaporAPI module
----------------------
+wapor.PCP\_daily module
+-----------------------
 
-.. automodule:: wapor.WaporAPI
+.. automodule:: wapor.PCP_daily
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+wapor.PCP\_monthly module
+-------------------------
+
+.. automodule:: wapor.PCP_monthly
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+wapor.PCP\_yearly module
+------------------------
+
+.. automodule:: wapor.PCP_yearly
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+wapor.RET\_monthly module
+-------------------------
+
+.. automodule:: wapor.RET_monthly
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+wapor.RET\_yearly module
+------------------------
+
+.. automodule:: wapor.RET_yearly
     :members:
     :undoc-members:
     :show-inheritance:

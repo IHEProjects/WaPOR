@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import pytest
+# import pytest
 import wapor as WaPOR
 
 __author__ = "Quan Pan"
@@ -17,14 +17,15 @@ def test_download():
         'data', 'Download'
     )
 
-    latlim=[7.89, 12.4]
-    lonlim=[37.95, 43.35]
+    latlim = [7.89, 12.4]
+    lonlim = [37.95, 43.35]
 
-    #start and end date to download the data
-    Startdate='2009-01-01'
-    Enddate='2009-02-01'
+    # start and end date to download the data
+    Startdate = '2009-01-01'
+    Enddate = '2009-02-01'
 
-    arg = {'APIToken': 'ae34c8743c4dc4b3c32d26501fcef18b0cc47464baaa87cceb1b10d5ee1096ba03ab36196d29fe07',
+    arg = {'APIToken': 'ae34c8743c4dc4b3c32d26501fcef18b0cc47464'
+                       'baaa87cceb1b10d5ee1096ba03ab36196d29fe07',
            'Dir': dir_path,
            'Startdate': Startdate, 'Enddate': Enddate,
            'latlim': latlim, 'lonlim': lonlim,
@@ -54,3 +55,5 @@ def test_download():
     WaPOR.RET_yearly(**arg)
 
     assert True
+    # with pytest.raises(AssertionError):
+    #     fib(-10)

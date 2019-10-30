@@ -106,14 +106,14 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False):
     print('WaPOR GIS: Opening file...')
     checkMemory('OpenAsArray Start')
 
-    datatypes = {
-        "uint8": np.uint8, "int8": np.int8,
-        "uint16": np.uint16, "int16": np.int16, "Int16": np.int16,
-        "uint32": np.uint32, "int32": np.int32, "Int32": np.int32,
-        "float32": np.float32, "float64": np.float64,
-        "Float32": np.float32, "Float64": np.float64,
-        "complex64": np.complex64, "complex128": np.complex128,
-        "Complex64": np.complex64, "Complex128": np.complex128, }
+    # datatypes = {
+    #     "uint8": np.uint8, "int8": np.int8,
+    #     "uint16": np.uint16, "int16": np.int16, "Int16": np.int16,
+    #     "uint32": np.uint32, "int32": np.int32, "Int32": np.int32,
+    #     "float32": np.float32, "float64": np.float64,
+    #     "Float32": np.float32, "Float64": np.float64,
+    #     "complex64": np.complex64, "complex128": np.complex128,
+    #     "Complex64": np.complex64, "Complex128": np.complex128, }
 
     DataSet = gdal.Open(fh, gdal.GA_ReadOnly)
     checkMemory('OpenAsArray Opened')

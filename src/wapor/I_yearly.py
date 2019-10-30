@@ -59,10 +59,11 @@ def main(APIToken='',
                         ' only support level 1 and level 2 data.'
                         ' For higher level, use WaPORAPI module')
 
+    cube_info = WaPOR.API.getCubeInfo(
+        cube_code, version=version, level=level)
     try:
-        cube_info = WaPOR.API.getCubeInfo(
-            cube_code, version=version, level=level)
         multiplier = cube_info['measure']['multiplier']
+        unit = cube_info['measure']['unit']
     except BaseException:
         raise Exception('WaPOR I   ERROR: Cannot get cube info.'
                         ' Check if WaPOR version has cube %s' % (cube_code))
@@ -109,13 +110,11 @@ def main(APIToken='',
         resp = requests.get(WaPOR.API.getCropRasterURL(bbox,
                                                        cube_code,
                                                        row['time_code'],
-                                                       row['raster_id'],
-                                                       WaPOR.API.token['Access']))
+                                                       row['raster_id']))
         with open(download_file, 'wb') as fp:
             fp.write(resp.content)
         resp = None
         checkMemory('{} Downloading end'.format(index))
-
 
         # GDAL download_file * multiplier => outfilename
         driver, NDV, xsize, ysize, GeoT, Projection = gis.GetGeoInfo(
