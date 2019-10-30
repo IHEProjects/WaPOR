@@ -11,15 +11,22 @@ import requests
 
 import numpy as np
 
-import download as WaPOR
+try:
+    from . import download as WaPOR
+except ImportError as err:
+    print(err)
+    from wapor import download as WaPOR
 
 try:
     from .download import GIS_functions as gis
-except ImportError:
-    from download import GIS_functions as gis
+except ImportError as err:
+    print(err)
+    from wapor.download import GIS_functions as gis
 
 
-def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
+def main(APIToken='',
+         Dir='',
+         Startdate='2009-01-01', Enddate='2018-12-31',
          latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],
          version=2, level=1, Waitbar=1):
     """
@@ -34,6 +41,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     """
     print('WaPOR RET: Download dekadal WaPOR Reference Evapotranspiration data'
           ' for the period %s till %s' % (Startdate, Enddate))
+    WaPOR.API.setAPIToken(APIToken)
     checkMemory('Start')
 
     # Download data
@@ -158,14 +166,3 @@ def checkMemory(txt=''):
     mem = psutil.virtual_memory()
     print('WaPOR RET: > Memory available      : {t} {v:.2f} MB'.format(
         t=txt, v=mem.available / 1024 / 1024))
-
-
-if __name__ == "__main__":
-    dir_path = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        '../', '../', 'tests', 'data', 'Download'
-    )
-    main(Dir=dir_path, Startdate='2009-01-01', Enddate='2018-12-31',
-         #  latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],
-         latlim=[-40.05, 40.05], lonlim=[-30.5, 0.0],
-         version=2, level=1)

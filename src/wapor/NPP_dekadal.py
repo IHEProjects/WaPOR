@@ -11,14 +11,22 @@ import requests
 
 import numpy as np
 
-import download as WaPOR
+try:
+    from . import download as WaPOR
+except ImportError as err:
+    print(err)
+    from wapor import download as WaPOR
+
 try:
     from .download import GIS_functions as gis
-except ImportError:
-    from download import GIS_functions as gis
+except ImportError as err:
+    print(err)
+    from wapor.download import GIS_functions as gis
 
 
-def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
+def main(APIToken='',
+         Dir='',
+         Startdate='2009-01-01', Enddate='2018-12-31',
          latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],
          version=2, level=1, Waitbar=1):
     """
@@ -33,6 +41,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
     """
     print('WaPOR NPP: Download dekadal WaPOR Net Primary Production data'
           ' for the period %s till %s' % (Startdate, Enddate))
+    WaPOR.API.setAPIToken(APIToken)
     checkMemory('Start')
 
     # Download data

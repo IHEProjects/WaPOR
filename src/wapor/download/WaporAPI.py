@@ -6,6 +6,8 @@ Contact: b.tran@un-ihe.org
 
 `FAO WaPOR GIS Manager API <https://io.apps.fao.org/gismgr/api/v1/swagger-ui.html>`_
 """
+import sys
+
 import requests
 import time
 import datetime
@@ -38,12 +40,10 @@ class WaPOR_API_class(object):
         Print job details, default True.
     """
 
-    def __init__(self, APIToken='', print_job=True):
+    def __init__(self, print_job=True):
         """
         """
-        if APIToken == '':
-            raise ValueError('WaPOR API ERROR: APIToken must be provided!')
-
+        self.isAPIToken = False
         self.print_job = print_job
 
         self.workspaces = {
@@ -96,10 +96,10 @@ class WaPOR_API_class(object):
         self.list_countries = None
         self.list_basins = None
 
-        # Initiate Token
-        self.getInitToken(APIToken)
+        # # Initiate Token
+        # self.setAPIToken(APIToken)
 
-    def getInitToken(self, APIToken):
+    def setAPIToken(self, APIToken):
         """Initiate AccessToken and RefreshToken
 
         Parameters
@@ -107,13 +107,15 @@ class WaPOR_API_class(object):
         APIToken: str
             Input WaPOR API token.
         """
+        if APIToken == '':
+            raise ValueError('WaPOR API ERROR: APIToken must be provided!')
+
         print('WaPOR API: Loading sign-in...')
 
         Token = self._query_accessToken(APIToken)
         if Token is None:
-            raise Exception(
-                'WaPOR API ERROR: The data with specified level version'
-                ' is not available in this version')
+            sys.exit('WaPOR API ERROR: The data with specified level version'
+                     ' is not available in this version')
         else:
             self.token = {
                 'API': APIToken,
@@ -125,6 +127,7 @@ class WaPOR_API_class(object):
                     'now': datetime.datetime.now().timestamp()
                 },
             }
+            self.isAPIToken = True
 
     def _query_accessToken(self, APIToken):
         """Query AccessToken and RefreshToken
@@ -151,7 +154,7 @@ class WaPOR_API_class(object):
             resq = requests.post(
                 request_url,
                 headers=request_headers)
-            resq.raise_for_status()
+            # resq.raise_for_status()
         except requests.exceptions.HTTPError as err:
             raise Exception("WaPOR API Http Error: {e}".format(e=err))
         except requests.exceptions.ConnectionError as err:
@@ -171,13 +174,21 @@ class WaPOR_API_class(object):
                 else:
                     print(resq_json['message'])
             except BaseException:
+                print('WaPOR API ERROR: APIToken "{v}"'.format(
+                    v=APIToken))
                 print('WaPOR API ERROR: Cannot get {url}'.format(
                     url=request_url))
 
-    def getCheckToken(self):
+    def isAPITokenSet(self):
+        if not self.isAPIToken:
+            sys.exit('WaPOR API ERROR: setAPIToken("your WaPOR API token").')
+
+    def isAPITokenExpired(self):
+
         """Check AccessToken expires, and refresh token
         """
         print('WaPOR API: Checking token...')
+        self.isAPITokenSet()
 
         # APIToken = self.token['API']
         RefToken = self.token['Refresh']
@@ -247,6 +258,8 @@ class WaPOR_API_class(object):
         """Get workspace
         """
         print('WaPOR API: Loading workspace...')
+        self.isAPITokenSet()
+
 
         df = self._query_workspaces()
         if df is None:
@@ -314,6 +327,7 @@ class WaPOR_API_class(object):
             Catalog table.
         """
         print('WaPOR API: Loading catalog WaPOR_{v}.L{l}...'.format(v=version, l=level))
+        self.isAPITokenSet()
 
         isFound = False
 
@@ -452,6 +466,7 @@ class WaPOR_API_class(object):
         """
         print('WaPOR API: Loading "{c_code}" CubeInfo...'.format(
             c_code=cube_code))
+        self.isAPITokenSet()
 
         isFound = False
 
@@ -617,7 +632,7 @@ class WaPOR_API_class(object):
             Available Data table.
         """
         # Check AccessToken expires
-        self.getCheckToken()
+        self.isAPITokenExpired()
         AccessToken = self.token['Access']
 
         # Get measure_code and dimension_code
@@ -827,6 +842,7 @@ class WaPOR_API_class(object):
         """
         print(
             'WaPOR API: Loading locations WaPOR_{v}.L{l}...'.format(v=version, l=level))
+        self.isAPITokenSet()
 
         self.version = 2
         self.level = None
@@ -933,7 +949,7 @@ class WaPOR_API_class(object):
             Download url and expiry_datetime.
         """
         # Check AccessToken expires
-        self.getCheckToken()
+        self.isAPITokenExpired()
         AccessToken = self.token['Access']
 
         print('WaPOR API: Loading "{c_code}" url from WaPOR{v}.L{l}...'.format(
@@ -1025,7 +1041,7 @@ class WaPOR_API_class(object):
             Download url.
         """
         # Check AccessToken expires
-        self.getCheckToken()
+        self.isAPITokenExpired()
         AccessToken = self.token['Access']
 
         # Get measure_code and dimension_code
@@ -1171,7 +1187,7 @@ class WaPOR_API_class(object):
             Area timeseries table.
         """
         # Check AccessToken expires
-        self.getCheckToken()
+        self.isAPITokenExpired()
         AccessToken = self.token['Access']
 
         # Get measure_code and dimension_code
@@ -1383,6 +1399,8 @@ class WaPOR_API_class(object):
         timeseries: :obj:`pandas.DataFrame`
             Point timeseries table.
         """
+        self.isAPITokenSet()
+
         # get cube info
         # cube_info = self.getCubeInfo(cube_code)
         catalog = self.getCatalog(self.version, self.level, cubeInfo=True)

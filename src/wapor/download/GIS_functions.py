@@ -197,11 +197,11 @@ def CreateGeoTiff(fh, Array, driver, NDV, xsize, ysize, GeoT,
             ])
     else:
         # 'COMPRESS=LZW',
+        # 'BIGTIFF=YES',
         DataSet = driver.Create(
             fh, xsize, ysize, 1,
             datatypes[Array.dtype.name],
             [
-                'BIGTIFF=YES',
                 'BLOCKXSIZE=256',
                 'BLOCKYSIZE=256'
             ])
