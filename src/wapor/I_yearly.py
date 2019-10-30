@@ -92,7 +92,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         # Local raster file name
         filename = 'I_WAPOR.v%s_level%s_mm-annually-1_%s.tif' % (
             version, level,
-            datetime.strptime(row['YEAR'], '%Y-%m').strftime('%Y'))
+            datetime.strptime(row['YEAR'], '%Y').strftime('%Y'))
         outfilename = os.path.join(Dir, filename)
         print('WaPOR I  : Local      file :', outfilename)
 

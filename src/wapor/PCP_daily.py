@@ -90,9 +90,9 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         # Local raster file name
         filename = 'PCP_WAPOR.v%s_level%s_mm-month-1_%s.%02s.%02s.tif' % (
             version, level,
-            datetime.strptime(row['MONTH'], '%Y-%m-%d').strftime('%Y'),
-            datetime.strptime(row['MONTH'], '%Y-%m-%d').strftime('%m'),
-            datetime.strptime(row['MONTH'], '%Y-%m-%d').strftime('%d'))
+            datetime.strptime(row['DAY'], '%Y-%m-%d').strftime('%Y'),
+            datetime.strptime(row['DAY'], '%Y-%m-%d').strftime('%m'),
+            datetime.strptime(row['DAY'], '%Y-%m-%d').strftime('%d'))
         outfilename = os.path.join(Dir, filename)
         print('WaPOR PCP: Local      file :', outfilename)
 

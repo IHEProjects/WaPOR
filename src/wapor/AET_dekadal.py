@@ -96,7 +96,7 @@ def main(Dir, Startdate='2009-01-01', Enddate='2018-12-31',
         print('WaPOR AET: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'AETI_WAPOR.v%s_level%s_mm-dekad-1_%s.tif' % (
+        filename = 'AET_WAPOR.v%s_level%s_mm-dekad-1_%s.tif' % (
             version, level,
             row['raster_id'])
         outfilename = os.path.join(Dir, filename)

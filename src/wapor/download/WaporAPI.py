@@ -1311,11 +1311,14 @@ class WaPOR_API_class(object):
                         jobType = resp['type']
 
                         if self.print_job:
-                            print('WaPOR API:  {i:d} {s}'.format(i=ijob,
-                                                                 s=resp['status']))
+                            print('WaPOR API:   {i} {t}sec {s}'.format(
+                                i=ijob, t=wait_time, s=resp['status']))
 
                         if resp['status'] == 'COMPLETED':
                             contiue = False
+                            print('WaPOR API:   {t}sec {s}'.format(
+                                t=wait_time, s=resp['status']))
+
                             if jobType == 'CROP RASTER':
                                 output = resp['output']['downloadUrl']
                             elif jobType == 'AREA STATS':
@@ -1327,6 +1330,9 @@ class WaPOR_API_class(object):
                             return output
                         elif resp['status'] == 'COMPLETED WITH ERRORS':
                             contiue = False
+                            print('WaPOR API:   {t}sec {s}'.format(
+                                t=wait_time, s=resp['status']))
+
                             print(resp['log'][-1])
                         elif resp['status'] == 'WAITING':
                             contiue = True
@@ -1337,6 +1343,10 @@ class WaPOR_API_class(object):
                                 print(resp['log'][-1])
                         elif resp['status'] == 'RUNNING':
                             contiue = True
+                            if wait_time % 60 == 0:
+                                print('WaPOR API:   {t}sec {s}'.format(
+                                    t=wait_time, s=resp['status']))
+
                             time.sleep(TIME_SLEEP_SECOND)
                             wait_time += TIME_SLEEP_SECOND
                             if wait_time > TIME_REQUEST_AFTER_SECOND:
