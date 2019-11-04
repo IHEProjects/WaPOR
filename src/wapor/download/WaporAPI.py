@@ -325,7 +325,7 @@ class WaPOR_API_class(object):
         catalog: :obj:`pandas.DataFrame`
             Catalog table.
         """
-        print('WaPOR API: Loading catalog WaPOR_{v}.L{lv}...'.format(
+        print('WaPOR API: Loading catalog WaPOR.v{v}_l{lv}...'.format(
             v=version, lv=level))
         self.isAPITokenSet()
 
@@ -344,12 +344,12 @@ class WaPOR_API_class(object):
         if isFound:
             df = self.catalog
 
-            print('WaPOR API: Loading catalog WaPOR_{v}.L{lv} found.'.format(
+            print('WaPOR API: Loading catalog WaPOR.v{v}_l{lv} found.'.format(
                 v=version, lv=level))
         else:
             df = self._query_catalog(version, level)
 
-            print('WaPOR API: Loading catalog WaPOR_{v}.L{lv} loaded.'.format(
+            print('WaPOR API: Loading catalog WaPOR.v{v}_l{lv} loaded.'.format(
                 v=version, lv=level))
 
         if cubeInfo:
@@ -382,13 +382,13 @@ class WaPOR_API_class(object):
                 self.level = level
             else:
                 raise ValueError(
-                    'WaPOR API ERROR: _query_catalog: level "{lv}"'
+                    'WaPOR API ERROR: _query_catalog: Level "{lv}"'
                     ' is not correct!'.format(lv=level))
         elif level is None:
             self.version = version
         else:
             raise ValueError(
-                'WaPOR API ERROR: _query_catalog: level "{lv}"'
+                'WaPOR API ERROR: _query_catalog: Level "{lv}"'
                 ' is not correct!'.format(lv=level))
 
         if self.level is None:
@@ -511,7 +511,7 @@ class WaPOR_API_class(object):
                 isFound = True
 
         if isFound:
-            print('WaPOR API: "{c_code}" is found in WaPOR_{v}.L{lv}'.format(
+            print('WaPOR API: "{c_code}" is found in WaPOR.v{v}_l{lv}'.format(
                 c_code=cube_code, v=version, lv=level))
 
             catalog = self.getCatalog(version, level, cubeInfo=True)
@@ -841,7 +841,7 @@ class WaPOR_API_class(object):
             Locations table.
         """
         print(
-            'WaPOR API: Loading locations WaPOR_{v}.L{lv}...'.format(
+            'WaPOR API: Loading locations WaPOR.v{v}_l{lv}...'.format(
                 v=version, lv=level))
         self.isAPITokenSet()
 
@@ -954,7 +954,7 @@ class WaPOR_API_class(object):
         self.isAPITokenExpired()
         AccessToken = self.token['Access']
 
-        print('WaPOR API: Loading "{c_code}" url from WaPOR{v}.L{lv}...'.format(
+        print('WaPOR API: Loading "{c_code}" url from WaPOR.v{v}_l{lv}...'.format(
             c_code=cube_code, v=self.version, lv=self.level))
 
         download_url = self._query_rasterUrl(cube_code, rasterId, AccessToken)
@@ -1062,7 +1062,7 @@ class WaPOR_API_class(object):
         except BaseException:
             print('WaPOR API ERROR: Cannot get cube info')
 
-        print('WaPOR API: Loading "{c_code}" url from WaPOR{v}.L{lv}...'.format(
+        print('WaPOR API: Loading "{c_code}" url from WaPOR.v{v}_l{lv}...'.format(
             c_code=cube_code, v=self.version, lv=self.level))
 
         # Create Polygon

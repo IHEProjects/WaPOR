@@ -124,7 +124,12 @@ def main(APIToken='',
         print('WaPOR PCP: Array         : {t}'.format(
             t=Array.dtype.name))
 
-        checkMemory('{} Multiply start'.format(index))
+        # checkMemory('{} Multiply start'.format(index))
+        # print('WaPOR AET: NDV           : {v} {t}'.format(
+        #     v=NDV, t=type(NDV)))
+        # print('WaPOR AET: multiplier    : {v} {t}'.format(
+        #     v=multiplier, t=type(multiplier)))
+
         NDV = np.float32(NDV)
         multiplier = np.float32(multiplier)
         print('WaPOR PCP: NDV           : {v} {t}'.format(
@@ -162,7 +167,8 @@ def main(APIToken='',
     checkMemory('End')
 
 
-def checkMemory(txt=''):
+def checkMemory(txt='', print_job=False):
     mem = psutil.virtual_memory()
-    print('WaPOR PCP: > Memory available      : {t} {v:.2f} MB'.format(
-        t=txt, v=mem.available / 1024 / 1024))
+    if print_job:
+        print('WaPOR PCP: > Memory available      : {t} {v:.2f} MB'.format(
+            t=txt, v=mem.available / 1024 / 1024))

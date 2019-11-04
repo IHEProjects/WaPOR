@@ -128,26 +128,30 @@ def main(APIToken='',
             download_file)
 
         Array = gis.OpenAsArray(download_file, nan_values=True)
-        print('WaPOR AET: Array         : {t}'.format(
-            t=Array.dtype.name))
+        # print('WaPOR AET: Array         : {t}'.format(
+        #     t=Array.dtype.name))
+        #
+        # checkMemory('{} Multiply start'.format(index))
+        # print('WaPOR AET: NDV           : {v} {t}'.format(
+        #     v=NDV, t=type(NDV)))
+        # print('WaPOR AET: multiplier    : {v} {t}'.format(
+        #     v=multiplier, t=type(multiplier)))
 
-        checkMemory('{} Multiply start'.format(index))
         NDV = np.float32(NDV)
         multiplier = np.float32(multiplier)
-        print('WaPOR AET: NDV           : {v} {t}'.format(
-            v=NDV, t=NDV.dtype.name))
-        print('WaPOR AET: multiplier    : {v} {t}'.format(
-            v=multiplier, t=multiplier.dtype.name))
+        # print('WaPOR AET: NDV           : {v} {t}'.format(
+        #     v=NDV, t=NDV.dtype.name))
+        # print('WaPOR AET: multiplier    : {v} {t}'.format(
+        #     v=multiplier, t=multiplier.dtype.name))
 
         # Array = np.where(Array < 0, 0, Array)  # mask out flagged value -9998
-
         NDV = NDV * multiplier
         Array = Array * multiplier
-        print('WaPOR AET: NDV           : {v} {t}'.format(
-            v=NDV, t=NDV.dtype.name))
-        print('WaPOR AET: Array         : {t}'.format(
-            t=Array.dtype.name))
-        checkMemory('{} Multiply end'.format(index))
+        # print('WaPOR AET: NDV           : {v} {t}'.format(
+        #     v=NDV, t=NDV.dtype.name))
+        # print('WaPOR AET: Array         : {t}'.format(
+        #     t=Array.dtype.name))
+        # checkMemory('{} Multiply end'.format(index))
 
         gis.CreateGeoTiff(outfilename, Array,
                           driver, NDV, xsize, ysize, GeoT, Projection)
@@ -170,10 +174,11 @@ def main(APIToken='',
         #                                 length=50)
 
 
-def checkMemory(txt=''):
+def checkMemory(txt='', print_job=False):
     mem = psutil.virtual_memory()
-    print('WaPOR AET: > Memory available      : {t} {v:.2f} MB'.format(
-        t=txt, v=mem.available / 1024 / 1024))
+    if print_job:
+        print('WaPOR AET: > Memory available      : {t} {v:.2f} MB'.format(
+            t=txt, v=mem.available / 1024 / 1024))
 
 
 # if __name__ == "__main__":

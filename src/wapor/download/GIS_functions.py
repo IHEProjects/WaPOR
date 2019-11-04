@@ -12,7 +12,7 @@ import gdal
 import osr
 
 
-def GetGeoInfo(fh, subdataset=0):
+def GetGeoInfo(fh, subdataset=0, print_job=False):
     """
     Substract metadata from a geotiff, HDF4 or netCDF file.
 
@@ -61,28 +61,29 @@ def GetGeoInfo(fh, subdataset=0):
     subNDV = SourceDS.GetRasterBand(1).GetNoDataValue()
     subMeta = SourceDS.GetRasterBand(1).GetMetadata()
 
-    print('WaPOR GIS:   Metadata              : {v}, {t}'.format(
-        v=meta, t=type(meta)))
-    print('WaPOR GIS:   xsize                 : {v}, {t}'.format(
-        v=xsize, t=type(xsize)))
-    print('WaPOR GIS:   ysize                 : {v}, {t}'.format(
-        v=ysize, t=type(ysize)))
-    print('WaPOR GIS:   GeoT                  : {v}, {t}'.format(
-        v=GeoT, t=type(GeoT)))
-    print('WaPOR GIS:   Projection            : {v}, {t}'.format(
-        v=Projection.GetAttrValue('AUTHORITY', 1), t=type(Projection)))
+    if print_job:
+        print('WaPOR GIS:   Metadata              : {v}, {t}'.format(
+            v=meta, t=type(meta)))
+        print('WaPOR GIS:   xsize                 : {v}, {t}'.format(
+            v=xsize, t=type(xsize)))
+        print('WaPOR GIS:   ysize                 : {v}, {t}'.format(
+            v=ysize, t=type(ysize)))
+        print('WaPOR GIS:   GeoT                  : {v}, {t}'.format(
+            v=GeoT, t=type(GeoT)))
+        print('WaPOR GIS:   Projection            : {v}, {t}'.format(
+            v=Projection.GetAttrValue('AUTHORITY', 1), t=type(Projection)))
 
-    print('WaPOR GIS:   sub NoDataValue       : {v}, {t}'.format(
-        v=subNDV, t=type(subNDV)))
-    print('WaPOR GIS:   sub Metadata          : {v}, {t}'.format(
-        v=subMeta, t=type(subMeta)))
+        print('WaPOR GIS:   sub NoDataValue       : {v}, {t}'.format(
+            v=subNDV, t=type(subNDV)))
+        print('WaPOR GIS:   sub Metadata          : {v}, {t}'.format(
+            v=subMeta, t=type(subMeta)))
 
     SourceDS = None
     checkMemory('GetGeoInfo End')
     return driver, subNDV, xsize, ysize, GeoT, Projection
 
 
-def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False):
+def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False, print_job=False):
     """
     Open a map as an numpy array.
 
@@ -126,17 +127,19 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False):
         Subdataset = DataSet.GetRasterBand(bandnumber)
         NDV = Subdataset.GetNoDataValue()
 
-    print('WaPOR GIS:   Band DataType         : {v}'.format(
-        v=Subdataset.DataType))
-    print('WaPOR GIS:   Band DataTypeName     : {v}'.format(
-        v=gdal.GetDataTypeName(Subdataset.DataType)))
-    print('WaPOR GIS:   NoDataValue           : {v}, {t}'.format(
-        v=NDV, t=type(NDV)))
+    if print_job:
+        print('WaPOR GIS:   Band DataType         : {v}'.format(
+            v=Subdataset.DataType))
+        print('WaPOR GIS:   Band DataTypeName     : {v}'.format(
+            v=gdal.GetDataTypeName(Subdataset.DataType)))
+        print('WaPOR GIS:   NoDataValue           : {v}, {t}'.format(
+            v=NDV, t=type(NDV)))
 
     # Array = Subdataset.ReadAsArray().astype(datatypes[dtype])
     Array = Subdataset.ReadAsArray()
-    print('WaPOR GIS:   Band Array dtype      : {v} {sp} {sz}'.format(
-        v=Array.dtype.name, sp=Array.shape, sz=Array.size))
+    if print_job:
+        print('WaPOR GIS:   Band Array dtype      : {v} {sp} {sz}'.format(
+            v=Array.dtype.name, sp=Array.shape, sz=Array.size))
     checkMemory('OpenAsArray Loaded')
 
     # if nan_values:
@@ -148,7 +151,7 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False):
 
 
 def CreateGeoTiff(fh, Array, driver, NDV, xsize, ysize, GeoT,
-                  Projection, explicit=True, compress=None):
+                  Projection, explicit=True, compress=None, print_job=False):
     """
     Creates a geotiff from a numpy array.
 
@@ -174,10 +177,11 @@ def CreateGeoTiff(fh, Array, driver, NDV, xsize, ysize, GeoT,
     print('WaPOR GIS: Creating tiff file...')
     checkMemory('CreateGeoTiff Start')
 
-    print('WaPOR GIS:   Array DataTypeName    : {t}'.format(
-        t=Array.dtype.name))
-    print('WaPOR GIS:   No Data Value         : {v} {t}'.format(
-        v=NDV, t=NDV.dtype.name))
+    if print_job:
+        print('WaPOR GIS:   Array DataTypeName    : {t}'.format(
+            t=Array.dtype.name))
+        print('WaPOR GIS:   No Data Value         : {v} {t}'.format(
+            v=NDV, t=NDV.dtype.name))
 
     datatypes = {
         "uint8": 1, "int8": 1,
@@ -227,7 +231,8 @@ def CreateGeoTiff(fh, Array, driver, NDV, xsize, ysize, GeoT,
 
 
 def MatchProjResNDV(source_file, target_fhs, output_dir,
-                    resample='near', dtype='float32', scale=None, ndv_to_zero=False):
+                    resample='near', dtype='float32',
+                    scale=None, ndv_to_zero=False, print_job=False):
     """
     Matches the projection, resolution and no-data-value of a list of target-files
     with a source-file and saves the new maps in output_dir.
@@ -313,7 +318,8 @@ def MatchProjResNDV(source_file, target_fhs, output_dir,
     return output_files
 
 
-def checkMemory(txt=''):
+def checkMemory(txt='', print_job=False):
     mem = psutil.virtual_memory()
-    print('WaPOR GIS: > Memory available      : {t} {v:.2f} MB'.format(
-        t=txt, v=mem.available / 1024 / 1024))
+    if print_job:
+        print('WaPOR GIS: > Memory available      : {t} {v:.2f} MB'.format(
+            t=txt, v=mem.available / 1024 / 1024))

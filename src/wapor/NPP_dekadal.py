@@ -131,7 +131,12 @@ def main(APIToken='',
         print('WaPOR NPP: Array         : {t}'.format(
             t=Array.dtype.name))
 
-        checkMemory('{} Multiply start'.format(index))
+        # checkMemory('{} Multiply start'.format(index))
+        # print('WaPOR AET: NDV           : {v} {t}'.format(
+        #     v=NDV, t=type(NDV)))
+        # print('WaPOR AET: multiplier    : {v} {t}'.format(
+        #     v=multiplier, t=type(multiplier)))
+
         NDV = np.float32(NDV)
         multiplier = np.float32(multiplier)
         print('WaPOR NPP: NDV           : {v} {t}'.format(
@@ -170,18 +175,19 @@ def main(APIToken='',
         #                                 length=50)
 
 
-def checkMemory(txt=''):
+def checkMemory(txt='', print_job=False):
     mem = psutil.virtual_memory()
-    print('WaPOR NPP: > Memory available      : {t} {v:.2f} MB'.format(
-        t=txt, v=mem.available / 1024 / 1024))
+    if print_job:
+        print('WaPOR NPP: > Memory available      : {t} {v:.2f} MB'.format(
+            t=txt, v=mem.available / 1024 / 1024))
 
 
-if __name__ == "__main__":
-    dir_path = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        '../', '../', 'tests', 'data', 'Download'
-    )
-    main(Dir=dir_path, Startdate='2009-01-01', Enddate='2018-12-31',
-         #  latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],
-         latlim=[-40.05, 40.05], lonlim=[-30.5, 0.0],
-         version=2, level=1)
+# if __name__ == "__main__":
+#     dir_path = os.path.join(
+#         os.path.dirname(os.path.realpath(__file__)),
+#         '../', '../', 'tests', 'data', 'Download'
+#     )
+#     main(Dir=dir_path, Startdate='2009-01-01', Enddate='2018-12-31',
+#          #  latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],
+#          latlim=[-40.05, 40.05], lonlim=[-30.5, 0.0],
+#          version=2, level=1)
