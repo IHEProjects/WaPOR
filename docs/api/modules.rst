@@ -1,7 +1,7 @@
-wapor
-=====
+WaporIHE
+========
 
 .. toctree::
    :maxdepth: 4
 
-   wapor
+   WaporIHE

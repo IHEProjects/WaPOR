@@ -3,13 +3,6 @@
 Description:
 This script collects WaPOR data from the WaPOR API.
 The data is available between 2009-01-01 till present.
-
-Example:
-from watools.Collect import WaPOR
-WaPOR.PCP_monthly(Dir='C:/Temp/', Startdate='2009-02-24', Enddate='2009-03-09',
-                     latlim=[50,54], lonlim=[3,7])
-WaPOR.AETI_monthly(Dir='C:/Temp/', Startdate='2009-02-24', Enddate='2009-03-09',
-                     latlim=[50,54], lonlim=[3,7])
 """
 from pkg_resources import get_distribution, DistributionNotFound
 
