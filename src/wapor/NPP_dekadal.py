@@ -70,7 +70,7 @@ def main(APIToken='',
         cube_code, version=version, level=level)
     try:
         multiplier = cube_info['measure']['multiplier']
-        unit = cube_info['measure']['unit']
+        # unit = cube_info['measure']['unit']
     except BaseException:
         raise Exception('WaPOR NPP ERROR: Cannot get cube info.'
                         ' Check if WaPOR version has cube %s' % (cube_code))
@@ -106,8 +106,8 @@ def main(APIToken='',
         print('WaPOR NPP: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'NPP_WAPOR.v%s_level%s_%s-dekad-1_%s.tif' % (
-            version, level, unit,
+        filename = 'NPP_WAPOR.v%s_l%s-dekad-1_%s.tif' % (
+            version, level,
             row['raster_id'])
         outfilename = os.path.join(Dir, filename)
         print('WaPOR NPP: Local      file :', outfilename)

@@ -63,7 +63,7 @@ def main(APIToken='',
         cube_code, version=version, level=level)
     try:
         multiplier = cube_info['measure']['multiplier']
-        unit = cube_info['measure']['unit']
+        # unit = cube_info['measure']['unit']
     except BaseException:
         raise Exception('WaPOR AET ERROR: Cannot get cube info.'
                         ' Check if WaPOR version has cube %s' % (cube_code))
@@ -99,8 +99,8 @@ def main(APIToken='',
         print('WaPOR AET: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'AET_WAPOR.v%s_level%s_%s-month-1_%s.%02s.tif' % (
-            version, level, unit,
+        filename = 'AET_WAPOR.v%s_l%s-month-1_%s.%02s.tif' % (
+            version, level,
             datetime.strptime(row['MONTH'], '%Y-%m').strftime('%Y'),
             datetime.strptime(row['MONTH'], '%Y-%m').strftime('%m'))
         outfilename = os.path.join(Dir, filename)

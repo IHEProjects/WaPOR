@@ -61,7 +61,7 @@ def main(APIToken='',
         cube_code, version=version, level=level)
     try:
         multiplier = cube_info['measure']['multiplier']
-        unit = cube_info['measure']['unit']
+        # unit = cube_info['measure']['unit']
     except BaseException:
         raise Exception('WaPOR RET ERROR: Cannot get cube info.'
                         ' Check if WaPOR version has cube %s' % (cube_code))
@@ -97,8 +97,8 @@ def main(APIToken='',
         print('WaPOR RET: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'RET_WAPOR.v%s_level%s_%s-annually-1_%s.tif' % (
-            version, level, unit,
+        filename = 'RET_WAPOR.v%s_l%s-annually-1_%s.tif' % (
+            version, level,
             datetime.strptime(row['YEAR'], '%Y').strftime('%Y'))
         outfilename = os.path.join(Dir, filename)
         print('WaPOR RET: Local      file :', outfilename)

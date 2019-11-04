@@ -1342,7 +1342,8 @@ class WaPOR_API_class(object):
                                 output = pd.DataFrame(
                                     results['items'], columns=results['header'])
                             else:
-                                print('WaPOR API ERROR: Invalid jobType')
+                                print('WaPOR API ERROR: Invalid jobType {t}'.format(
+                                    t=jobType))
                             return output
                         elif resp['status'] == 'COMPLETED WITH ERRORS':
                             contiue = False
@@ -1352,6 +1353,10 @@ class WaPOR_API_class(object):
                             print(resp['log'][-1])
                         elif resp['status'] == 'WAITING':
                             contiue = True
+                            if wait_time % 60 == 0:
+                                print('WaPOR API:   {t}sec {s}'.format(
+                                    t=wait_time, s=resp['status']))
+
                             time.sleep(TIME_SLEEP_SECOND)
                             wait_time += TIME_SLEEP_SECOND
                             if wait_time > TIME_REQUEST_AFTER_SECOND:
