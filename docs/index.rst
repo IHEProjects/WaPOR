@@ -1,8 +1,8 @@
-=====
-WaPOR
-=====
+========
+WaporIHE
+========
 
-This is the documentation of **WaPOR**.
+This is the documentation of **WaporIHE**.
 
 From the root of the project, run::
 
@@ -10,7 +10,7 @@ From the root of the project, run::
 
 Format scripts by PEP8
 
-    autopep8 --in-place --aggressive src/wapor/WaporAPI.py
+    autopep8 --in-place --aggressive src/WaporIHE/WaporAPI.py
 
 Unit test, run::
 

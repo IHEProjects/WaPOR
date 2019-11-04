@@ -2,7 +2,7 @@
 
 import os
 # import pytest
-import wapor as WaPOR
+import WaporIHE as WaPOR
 
 __author__ = "Quan Pan"
 __copyright__ = "Quan Pan"

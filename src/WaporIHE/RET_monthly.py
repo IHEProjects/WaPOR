@@ -15,13 +15,13 @@ try:
     from . import download as WaPOR
 except ImportError as err:
     print(err)
-    from wapor import download as WaPOR
+    from WaporIHE import download as WaPOR
 
 try:
     from .download import GIS_functions as gis
 except ImportError as err:
     print(err)
-    from wapor.download import GIS_functions as gis
+    from WaporIHE.download import GIS_functions as gis
 
 
 def main(APIToken='',
@@ -30,7 +30,7 @@ def main(APIToken='',
          latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],
          version=2, level=1, Waitbar=1):
     """
-    This function downloads dekadal WaPOR Precipitation data
+    This function downloads dekadal WaPOR Reference Evapotranspiration data
 
     Keyword arguments:
     Dir -- 'C:/file/to/path/'
@@ -39,7 +39,7 @@ def main(APIToken='',
     latlim -- [ymin, ymax] (values must be between -40.05 and 40.05)
     lonlim -- [xmin, xmax] (values must be between -30.05 and 65.05)
     """
-    print('WaPOR PCP: Download dekadal WaPOR Precipitation data'
+    print('WaPOR RET: Download dekadal WaPOR Reference Evapotranspiration data'
           ' for the period %s till %s' % (Startdate, Enddate))
     WaPOR.API.setAPIToken(APIToken)
     checkMemory('Start')
@@ -51,9 +51,9 @@ def main(APIToken='',
     bbox = [lonlim[0], latlim[0], lonlim[1], latlim[1]]
 
     if level == 1:
-        cube_code = 'L1_PCP_M'
+        cube_code = 'L1_RET_M'
     else:
-        raise Exception('WaPOR PCP ERROR: This module'
+        raise Exception('WaPOR RET ERROR: This module'
                         ' only support level 1 data.'
                         ' For higher level, use WaPORAPI module')
 
@@ -63,7 +63,7 @@ def main(APIToken='',
         multiplier = cube_info['measure']['multiplier']
         # unit = cube_info['measure']['unit']
     except BaseException:
-        raise Exception('WaPOR PCP ERROR: Cannot get cube info.'
+        raise Exception('WaPOR RET ERROR: Cannot get cube info.'
                         ' Check if WaPOR version has cube %s' % (cube_code))
     finally:
         cube_info = None
@@ -89,20 +89,20 @@ def main(APIToken='',
         os.makedirs(Dir)
 
     for index, row in df_avail.iterrows():
-        print('WaPOR PCP: ----- {} -----'.format(index))
+        print('WaPOR RET: ----- {} -----'.format(index))
         checkMemory('{} AvailData loop start'.format(index))
 
         # Download raster file name
         download_file = os.path.join(Dir, '{0}.tif'.format(row['raster_id']))
-        print('WaPOR PCP: Downloaded file :', download_file)
+        print('WaPOR RET: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'PCP_WAPOR.v%s_l%s-month-1_%s.%02s.tif' % (
+        filename = 'RET_WAPOR.v%s_l%s-month-1_%s.%02s.tif' % (
             version, level,
             datetime.strptime(row['MONTH'], '%Y-%m').strftime('%Y'),
             datetime.strptime(row['MONTH'], '%Y-%m').strftime('%m'))
         outfilename = os.path.join(Dir, filename)
-        print('WaPOR PCP: Local      file :', outfilename)
+        print('WaPOR RET: Local      file :', outfilename)
 
         # Downloading raster file
         checkMemory('{} Downloading start'.format(index))
@@ -120,7 +120,7 @@ def main(APIToken='',
             download_file)
 
         Array = gis.OpenAsArray(download_file, nan_values=True)
-        print('WaPOR PCP: Array         : {t}'.format(
+        print('WaPOR RET: Array         : {t}'.format(
             t=Array.dtype.name))
 
         # checkMemory('{} Multiply start'.format(index))
@@ -131,16 +131,16 @@ def main(APIToken='',
 
         NDV = np.float32(NDV)
         multiplier = np.float32(multiplier)
-        print('WaPOR PCP: NDV           : {v} {t}'.format(
+        print('WaPOR RET: NDV           : {v} {t}'.format(
             v=NDV, t=NDV.dtype.name))
-        print('WaPOR PCP: multiplier    : {v} {t}'.format(
+        print('WaPOR RET: multiplier    : {v} {t}'.format(
             v=multiplier, t=multiplier.dtype.name))
 
         NDV = NDV * multiplier
         Array = Array * multiplier
-        print('WaPOR PCP: NDV           : {v} {t}'.format(
+        print('WaPOR RET: NDV           : {v} {t}'.format(
             v=NDV, t=NDV.dtype.name))
-        print('WaPOR PCP: Array         : {t}'.format(
+        print('WaPOR RET: Array         : {t}'.format(
             t=Array.dtype.name))
         checkMemory('{} Multiply end'.format(index))
 
@@ -155,7 +155,7 @@ def main(APIToken='',
             os.remove(download_file)
         except OSError as err:
             # if failed, report it back to the user
-            print("WaPOR PCP ERROR: %s - %s." % (err.filename, err.strerror))
+            print("WaPOR RET ERROR: %s - %s." % (err.filename, err.strerror))
 
         # if Waitbar == 1:
         #     amount += 1
@@ -169,5 +169,5 @@ def main(APIToken='',
 def checkMemory(txt='', print_job=False):
     mem = psutil.virtual_memory()
     if print_job:
-        print('WaPOR PCP: > Memory available      : {t} {v:.2f} MB'.format(
+        print('WaPOR RET: > Memory available      : {t} {v:.2f} MB'.format(
             t=txt, v=mem.available / 1024 / 1024))

@@ -15,13 +15,13 @@ try:
     from . import download as WaPOR
 except ImportError as err:
     print(err)
-    from wapor import download as WaPOR
+    from WaporIHE import download as WaPOR
 
 try:
     from .download import GIS_functions as gis
 except ImportError as err:
     print(err)
-    from wapor.download import GIS_functions as gis
+    from WaporIHE.download import GIS_functions as gis
 
 
 def main(APIToken='',
