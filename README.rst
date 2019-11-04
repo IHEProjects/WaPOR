@@ -25,15 +25,6 @@ WaPOR Download Tools
 
 Temporary **wapor** project, for development only.
 
-Collect
--------
-
-+------------+------------------------------------------+
-| Products   | Link                                     |
-+============+==========================================+
-| FTP_WA     | https://www.wapor.org/         |
-+------------+------------------------------------------+
-
 Data type
 ---------
 

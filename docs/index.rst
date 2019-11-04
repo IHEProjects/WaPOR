@@ -28,6 +28,7 @@ PyPI upload, run ``setup.py``::
     2. Github - Release - new release v0.0.1
 
     python setup.py sdist bdist_wheel
+    twine check dist/*.tar.gz
     twine upload dist/*
 
 .. warning::
