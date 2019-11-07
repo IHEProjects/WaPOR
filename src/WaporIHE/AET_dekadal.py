@@ -30,7 +30,9 @@ def main(APIToken='',
          latlim=[-40.05, 40.05], lonlim=[-30.5, 65.05],
          version=2, level=1, Waitbar=1):
     """
-    This function downloads dekadal WaPOR Actual Evapotranspiration data
+    This function downloads dekadal WaPOR Actual Evapotranspiration data.
+    latlim: south, north
+    lonlim: east, west
 
     Keyword arguments:
     Dir -- 'C:/file/to/path/'
