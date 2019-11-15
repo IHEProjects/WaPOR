@@ -14,8 +14,8 @@
 .. |DockerHub| image:: https://img.shields.io/docker/cloud/build/quanpan302/ihe_projects_wapor
 .. _DockerHub: https://hub.docker.com/r/quanpan302/ihe_projects_wapor
 
-.. |PyPI| image:: https://img.shields.io/pypi/v/WaPOR
-.. _PyPI: https://pypi.org/project/WaPOR/
+.. |PyPI| image:: https://img.shields.io/pypi/v/WaporIHE
+.. _PyPI: https://pypi.org/project/WaporIHE/
 
 
 WaPOR
