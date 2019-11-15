@@ -97,7 +97,7 @@ def main(APIToken='',
         print('WaPOR PCP: Downloaded file :', download_file)
 
         # Local raster file name
-        filename = 'PCP_WAPOR.v%s_l%s-month-1_%s.%02s.%02s.tif' % (
+        filename = 'PCP_WAPOR.v%s_l%s-daily-1_%s.%02s.%02s.tif' % (
             version, level,
             datetime.strptime(row['DAY'], '%Y-%m-%d').strftime('%Y'),
             datetime.strptime(row['DAY'], '%Y-%m-%d').strftime('%m'),
@@ -120,7 +120,7 @@ def main(APIToken='',
         driver, NDV, xsize, ysize, GeoT, Projection = gis.GetGeoInfo(
             download_file)
 
-        Array = gis.OpenAsArray(download_file, nan_values=True)
+        Array = gis.OpenAsArray(download_file, nan_values=False)
         print('WaPOR PCP: Array         : {t}'.format(
             t=Array.dtype.name))
 

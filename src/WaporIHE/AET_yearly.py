@@ -120,7 +120,7 @@ def main(APIToken='',
         driver, NDV, xsize, ysize, GeoT, Projection = gis.GetGeoInfo(
             download_file)
 
-        Array = gis.OpenAsArray(download_file, nan_values=True)
+        Array = gis.OpenAsArray(download_file, nan_values=False)
         print('WaPOR AET: Array         : {t}'.format(
             t=Array.dtype.name))
 

@@ -107,14 +107,14 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False, print_job=F
     print('WaPOR GIS: Opening file...')
     checkMemory('OpenAsArray Start')
 
-    # datatypes = {
-    #     "uint8": np.uint8, "int8": np.int8,
-    #     "uint16": np.uint16, "int16": np.int16, "Int16": np.int16,
-    #     "uint32": np.uint32, "int32": np.int32, "Int32": np.int32,
-    #     "float32": np.float32, "float64": np.float64,
-    #     "Float32": np.float32, "Float64": np.float64,
-    #     "complex64": np.complex64, "complex128": np.complex128,
-    #     "Complex64": np.complex64, "Complex128": np.complex128, }
+    datatypes = {
+        "uint8": np.uint8, "int8": np.int8,
+        "uint16": np.uint16, "int16": np.int16, "Int16": np.int16,
+        "uint32": np.uint32, "int32": np.int32, "Int32": np.int32,
+        "float32": np.float32, "float64": np.float64,
+        "Float32": np.float32, "Float64": np.float64,
+        "complex64": np.complex64, "complex128": np.complex128,
+        "Complex64": np.complex64, "Complex128": np.complex128, }
 
     DataSet = gdal.Open(fh, gdal.GA_ReadOnly)
     checkMemory('OpenAsArray Opened')
@@ -135,15 +135,15 @@ def OpenAsArray(fh, bandnumber=1, dtype='float32', nan_values=False, print_job=F
         print('WaPOR GIS:   NoDataValue           : {v}, {t}'.format(
             v=NDV, t=type(NDV)))
 
-    # Array = Subdataset.ReadAsArray().astype(datatypes[dtype])
-    Array = Subdataset.ReadAsArray()
+    Array = Subdataset.ReadAsArray().astype(datatypes[dtype])
+    # Array = Subdataset.ReadAsArray()
     if print_job:
         print('WaPOR GIS:   Band Array dtype      : {v} {sp} {sz}'.format(
             v=Array.dtype.name, sp=Array.shape, sz=Array.size))
     checkMemory('OpenAsArray Loaded')
 
-    # if nan_values:
-    #     Array[Array == NDV] = np.nan
+    if nan_values:
+        Array[Array == NDV] = np.nan
 
     DataSet = None
     checkMemory('OpenAsArray End')
@@ -210,11 +210,11 @@ def CreateGeoTiff(fh, Array, driver, NDV, xsize, ysize, GeoT,
                 'BLOCKYSIZE=256'
             ])
 
-    # if NDV is None:
-    #     NDV = -9999
-    #
-    # if explicit:
-    #     Array[np.isnan(Array)] = NDV
+    if NDV is None:
+        NDV = -9999
+
+    if explicit:
+        Array[np.isnan(Array)] = NDV
 
     DataSet.SetGeoTransform(GeoT)
     DataSet.SetProjection(Projection.ExportToWkt())
@@ -222,11 +222,10 @@ def CreateGeoTiff(fh, Array, driver, NDV, xsize, ysize, GeoT,
     DataSet.GetRasterBand(1).SetNoDataValue(float(NDV))
     DataSet.GetRasterBand(1).WriteArray(Array)
 
+    if "nt" not in Array.dtype.name:
+        Array[Array == NDV] = np.nan
+
     DataSet = None
-
-    # if "nt" not in Array.dtype.name:
-    #     Array[Array == NDV] = np.nan
-
     checkMemory('CreateGeoTiff End')
 
 
